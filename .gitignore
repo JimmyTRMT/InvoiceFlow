@@ -1,0 +1,23 @@
+# Environment and secrets
+.env
+
+# Local database and anything else Flask stores per instance
+instance/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editors and operating system noise
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
