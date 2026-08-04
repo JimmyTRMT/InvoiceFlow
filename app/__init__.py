@@ -10,7 +10,9 @@ import os
 from flask import Flask
 
 from app.api.health import health_bp
+from app.cli import register_cli
 from app.config import get_config
+from app.database import register_database_events
 from app.errors import register_error_handlers
 from app.extensions import db
 
@@ -28,7 +30,9 @@ def create_app(config_name=None):
     _ensure_instance_folder(app)
 
     db.init_app(app)
+    register_database_events(app)
     register_error_handlers(app)
+    register_cli(app)
     _register_blueprints(app)
 
     return app

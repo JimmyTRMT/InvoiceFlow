@@ -5,8 +5,8 @@ invoices. It keeps a list of clients, builds invoices with several line
 items, computes the totals, and shows what is outstanding, paid or
 overdue.
 
-This repository is a work in progress. The backend skeleton is in place
-and serves a health check endpoint; the features are added step by step.
+This repository is a work in progress. The backend skeleton and the
+database models are in place; the features are added step by step.
 
 ## Prerequisites
 
@@ -53,6 +53,12 @@ On macOS or Linux use this instead:
 cp .env.example .env
 ```
 
+Create the database file and its tables:
+
+```
+flask --app run.py init-db
+```
+
 ## Running the app
 
 ```
@@ -68,11 +74,19 @@ available at http://127.0.0.1:5000/api/health
 InvoiceFlow/
     app/
         __init__.py      application factory
+        cli.py           flask commands, such as init-db
         config.py        settings read from the environment
+        database.py      schema creation and SQLite setup
         errors.py        JSON error handlers
         extensions.py    shared SQLAlchemy instance
         api/
             health.py    health check endpoint
+        models/
+            client.py    client table
+            invoice.py   invoice table and statuses
+            line_item.py line items of an invoice
+            mixins.py    timestamps and serialisation helpers
+            types.py     exact decimal column type
     .env.example         every variable the app reads
     requirements.txt     pinned dependencies
     run.py               development entry point
