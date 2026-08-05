@@ -6,12 +6,7 @@ from app.extensions import db
 
 
 def utcnow():
-    """Return the current UTC time, without a timezone attached.
-
-    SQLite stores no offset, so an aware datetime would silently come
-    back naive. Dropping the tzinfo here makes the round trip lossless
-    and keeps one rule: everything in the database is UTC.
-    """
+    """Return the current UTC time as the naive value SQLite stores."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 

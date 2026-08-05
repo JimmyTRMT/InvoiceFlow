@@ -1,8 +1,4 @@
-"""Database models.
-
-Importing this package registers every table on the SQLAlchemy metadata,
-which is what create_all needs in order to build the schema.
-"""
+"""Database models, imported here so create_all sees every table."""
 
 from app.models.client import Client
 from app.models.invoice import OVERDUE_STATUS, Invoice, InvoiceStatus

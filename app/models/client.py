@@ -1,15 +1,11 @@
-"""Client model: whoever an invoice is addressed to."""
+"""Client model."""
 
 from app.extensions import db
 from app.models.mixins import TimestampMixin, to_iso
 
 
 class Client(db.Model, TimestampMixin):
-    """A customer of the freelancer.
-
-    Only the name and the email are mandatory: the postal address is
-    often unknown when a client is first added and filled in later.
-    """
+    """A customer the freelancer bills."""
 
     __tablename__ = "clients"
 
@@ -19,8 +15,8 @@ class Client(db.Model, TimestampMixin):
     company = db.Column(db.String(120))
     address = db.Column(db.Text)
 
-    # No delete cascade on purpose: invoices are an accounting record and
-    # must never disappear because a client row was removed.
+    # No delete cascade: invoices are an accounting record and must not
+    # disappear with the client row.
     invoices = db.relationship("Invoice", back_populates="client")
 
     def summary(self):
@@ -44,5 +40,5 @@ class Client(db.Model, TimestampMixin):
         }
 
     def __repr__(self):
-        """Readable form used in the shell and in log messages."""
+        """Return the readable form used in the shell and in logs."""
         return f"<Client {self.id} {self.name!r}>"

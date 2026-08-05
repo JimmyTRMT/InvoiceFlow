@@ -1,4 +1,4 @@
-"""Line item model: one billable row on an invoice."""
+"""Line item model."""
 
 from decimal import ROUND_HALF_UP
 
@@ -7,11 +7,7 @@ from app.models.types import TWO_PLACES, ExactDecimal
 
 
 class InvoiceLineItem(db.Model):
-    """A single description, quantity and unit price on an invoice.
-
-    The line total is derived rather than stored: it is only ever read
-    through the invoice, which already persists the aggregated amounts.
-    """
+    """One billable row on an invoice."""
 
     __tablename__ = "invoice_line_items"
     __table_args__ = (
@@ -36,7 +32,7 @@ class InvoiceLineItem(db.Model):
 
     @property
     def line_total(self):
-        """Amount billed for this line, rounded to the cent."""
+        """Return the amount billed for this line, rounded to the cent."""
         return (self.quantity * self.unit_price).quantize(
             TWO_PLACES, rounding=ROUND_HALF_UP
         )
@@ -52,5 +48,5 @@ class InvoiceLineItem(db.Model):
         }
 
     def __repr__(self):
-        """Readable form used in the shell and in log messages."""
+        """Return the readable form used in the shell and in logs."""
         return f"<InvoiceLineItem {self.id} {self.description!r}>"

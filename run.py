@@ -1,8 +1,4 @@
-"""Development entry point.
-
-Starts the Flask development server. A production deployment would run
-the same create_app factory behind a real WSGI server instead.
-"""
+"""Development entry point for the InvoiceFlow API."""
 
 from app import create_app
 

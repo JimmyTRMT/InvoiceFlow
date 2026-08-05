@@ -1,4 +1,4 @@
-"""Command line entry points registered on the Flask CLI."""
+"""Commands registered on the Flask CLI."""
 
 import click
 from flask.cli import with_appcontext

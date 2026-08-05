@@ -1,8 +1,4 @@
-"""Health check endpoint.
-
-Used to confirm that the process is up and answering requests, both
-during setup and when the frontend cannot reach the API.
-"""
+"""Health check endpoint."""
 
 from datetime import datetime, timezone
 

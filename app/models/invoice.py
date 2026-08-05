@@ -12,12 +12,7 @@ OVERDUE_STATUS = "overdue"
 
 
 class InvoiceStatus(str, Enum):
-    """The statuses a user is allowed to store on an invoice.
-
-    "overdue" is deliberately missing: it is derived from the due date by
-    Invoice.effective_status, so it cannot drift out of date the way a
-    stored flag would.
-    """
+    """The statuses a user is allowed to store on an invoice."""
 
     DRAFT = "draft"
     SENT = "sent"
@@ -30,11 +25,7 @@ class InvoiceStatus(str, Enum):
 
 
 def _status_check_constraint():
-    """Build the CHECK constraint that guards the status column.
-
-    Generating it from the enum keeps the database and the Python code
-    from drifting apart when a status is added.
-    """
+    """Build the status constraint from the enum so both stay in sync."""
     allowed = ", ".join(f"'{value}'" for value in InvoiceStatus.values())
     return db.CheckConstraint(
         f"status IN ({allowed})", name="ck_invoices_status"
@@ -42,13 +33,7 @@ def _status_check_constraint():
 
 
 class Invoice(db.Model, TimestampMixin):
-    """An invoice, its client, its line items and its amounts.
-
-    The totals are stored instead of being recomputed on every read
-    because the dashboard aggregates them directly in SQL. Every write
-    path calls recalculate_totals, so the stored amounts can never
-    disagree with the line items.
-    """
+    """An invoice with its client, its line items and its amounts."""
 
     __tablename__ = "invoices"
     __table_args__ = (
@@ -77,10 +62,11 @@ class Invoice(db.Model, TimestampMixin):
     )
     notes = db.Column(db.Text)
 
-    # Kept separately from the status so the dashboard can aggregate what
-    # was actually cashed in during a given month.
+    # Kept apart from the status so the dashboard can aggregate by month.
     paid_at = db.Column(db.DateTime)
 
+    # Stored rather than derived because the dashboard sums them in SQL,
+    # and always rewritten by recalculate_totals.
     subtotal = db.Column(
         ExactDecimal(2), nullable=False, default=Decimal("0")
     )
@@ -110,11 +96,7 @@ class Invoice(db.Model, TimestampMixin):
         return OVERDUE_STATUS if self.is_overdue else self.status
 
     def recalculate_totals(self):
-        """Recompute the subtotal, the tax and the grand total.
-
-        The client sends line items, never amounts, so this is the only
-        place where an invoice decides what it is worth.
-        """
+        """Recompute the amounts from the line items and the tax rate."""
         subtotal = Decimal("0")
         for item in self.line_items:
             subtotal += item.line_total
@@ -127,11 +109,7 @@ class Invoice(db.Model, TimestampMixin):
         self.total = self.subtotal + self.tax_amount
 
     def to_dict(self, include_line_items=True):
-        """Serialise the invoice for the JSON API.
-
-        List views skip the line items, which keeps the dashboard payload
-        small when an invoice carries a long breakdown.
-        """
+        """Serialise the invoice for the JSON API."""
         payload = {
             "id": self.id,
             "number": self.number,
@@ -158,5 +136,5 @@ class Invoice(db.Model, TimestampMixin):
         return payload
 
     def __repr__(self):
-        """Readable form used in the shell and in log messages."""
+        """Return the readable form used in the shell and in logs."""
         return f"<Invoice {self.number} {self.status}>"

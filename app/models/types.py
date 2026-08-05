@@ -1,9 +1,4 @@
-"""Custom SQLAlchemy column types.
-
-SQLite has no fixed point numeric type: a NUMERIC column travels through
-a C double, which is exactly how a 0.01 error ends up in an invoice
-total. The type below keeps money and quantities exact instead.
-"""
+"""Column types that keep decimal values exact in SQLite."""
 
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -14,12 +9,7 @@ TWO_PLACES = Decimal("0.01")
 
 
 class ExactDecimal(TypeDecorator):
-    """A decimal value stored as a scaled integer.
-
-    Values are multiplied by 10 ** scale on the way into the database and
-    divided on the way out, so the application always works with Decimal
-    while SQLite only ever holds integers.
-    """
+    """A decimal stored as a scaled integer, free of float rounding."""
 
     impl = Integer
     cache_ok = True
