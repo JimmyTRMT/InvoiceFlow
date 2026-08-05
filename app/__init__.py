@@ -1,28 +1,21 @@
-"""Application factory for the InvoiceFlow backend.
-
-Building the app inside a function instead of at import time keeps the
-configuration explicit: the web server, the seed script and any future
-tooling all create their own instance with the settings they need.
-"""
+"""Application factory for the InvoiceFlow backend."""
 
 import os
 
 from flask import Flask
 
+from app.api.clients import clients_bp
 from app.api.health import health_bp
 from app.cli import register_cli
 from app.config import get_config
 from app.database import register_database_events
 from app.errors import register_error_handlers
 from app.extensions import db
+from app.security import register_csrf_protection
 
 
 def create_app(config_name=None):
-    """Create a configured Flask application.
-
-    The optional config_name overrides the APP_ENV variable, which is
-    what scripts use when they need a specific environment.
-    """
+    """Create a Flask application wired for the given environment."""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(get_config(config_name))
 
@@ -31,6 +24,7 @@ def create_app(config_name=None):
 
     db.init_app(app)
     register_database_events(app)
+    register_csrf_protection(app)
     register_error_handlers(app)
     register_cli(app)
     _register_blueprints(app)
@@ -39,11 +33,7 @@ def create_app(config_name=None):
 
 
 def _require_secret_key(app):
-    """Refuse to start outside development without a real SECRET_KEY.
-
-    The fallback key is regenerated on every boot, which would silently
-    invalidate signed cookies, so a deployed instance must provide one.
-    """
+    """Refuse to start on a generated key outside development."""
     if app.debug or app.testing or os.environ.get("SECRET_KEY"):
         return
     raise RuntimeError(
@@ -64,3 +54,4 @@ def _ensure_instance_folder(app):
 def _register_blueprints(app):
     """Mount every API blueprint under the /api prefix."""
     app.register_blueprint(health_bp, url_prefix="/api")
+    app.register_blueprint(clients_bp, url_prefix="/api")

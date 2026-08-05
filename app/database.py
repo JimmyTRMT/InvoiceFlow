@@ -1,22 +1,21 @@
-"""Database bootstrap and SQLite specific setup."""
+"""Database bootstrap, SQLite setup and session helpers."""
 
+import logging
 import sqlite3
 
 from sqlalchemy import event
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
 
-# Importing the models attaches them to the SQLAlchemy metadata, which is
-# how create_schema knows which tables to build.
+# Imported for its side effect: it registers the tables on the metadata.
 from app import models  # noqa: F401  isort:skip
+
+logger = logging.getLogger(__name__)
 
 
 def _enable_sqlite_foreign_keys(dbapi_connection, connection_record):
-    """Turn on foreign key enforcement for a SQLite connection.
-
-    SQLite ignores foreign keys unless the pragma is set on every single
-    connection, which would let orphan line items into the database.
-    """
+    """Turn on the foreign key checks that SQLite skips by default."""
     if not isinstance(dbapi_connection, sqlite3.Connection):
         return
     cursor = dbapi_connection.cursor()
@@ -25,15 +24,21 @@ def _enable_sqlite_foreign_keys(dbapi_connection, connection_record):
 
 
 def register_database_events(app):
-    """Attach the connection listeners to this application's engine.
-
-    Binding to the engine rather than to the global Engine class keeps
-    the listeners from stacking when several apps live in one process.
-    """
+    """Attach the connection listeners to this application's engine."""
     with app.app_context():
         event.listen(db.engine, "connect", _enable_sqlite_foreign_keys)
 
 
 def create_schema():
-    """Create every missing table. Requires an application context."""
+    """Create every missing table, from inside an application context."""
     db.create_all()
+
+
+def commit_or_rollback(action):
+    """Commit the transaction, rolling back and logging on failure."""
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        logger.exception("Database error while trying to %s", action)
+        raise

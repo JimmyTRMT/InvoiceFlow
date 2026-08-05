@@ -1,20 +1,22 @@
-"""JSON error handlers used by the whole API.
-
-Flask answers with an HTML page when something goes wrong. The frontend
-only ever reads JSON, so these handlers keep one single response shape
-for expected failures (404, 400) and unexpected ones alike.
-"""
+"""JSON error handlers, so the API never answers with an HTML page."""
 
 import logging
 
 from flask import jsonify
 from werkzeug.exceptions import HTTPException
 
+from app.exceptions import ApiError
+
 logger = logging.getLogger(__name__)
 
 
 def register_error_handlers(app):
     """Attach the JSON error handlers to an application instance."""
+
+    @app.errorhandler(ApiError)
+    def handle_api_error(error):
+        """Render an expected failure with its own status code."""
+        return jsonify(error.to_dict()), error.status_code
 
     @app.errorhandler(HTTPException)
     def handle_http_exception(error):
@@ -24,11 +26,7 @@ def register_error_handlers(app):
 
     @app.errorhandler(Exception)
     def handle_unexpected_error(error):
-        """Log the failure and return a generic message to the client.
-
-        Internal details are kept in the server log only: an exception
-        message can leak file paths or SQL fragments.
-        """
+        """Log the failure and answer without exposing any internals."""
         logger.exception("Unhandled application error: %s", error)
         payload = {
             "error": "Internal Server Error",

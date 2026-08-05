@@ -5,8 +5,9 @@ invoices. It keeps a list of clients, builds invoices with several line
 items, computes the totals, and shows what is outstanding, paid or
 overdue.
 
-This repository is a work in progress. The backend skeleton and the
-database models are in place; the features are added step by step.
+This repository is a work in progress. The backend skeleton, the
+database models and the clients API are in place; the features are added
+step by step.
 
 ## Prerequisites
 
@@ -68,6 +69,30 @@ python run.py
 The server starts on http://127.0.0.1:5000 and the health check is
 available at http://127.0.0.1:5000/api/health
 
+## The API so far
+
+| Method | Path                | What it does                        |
+| ------ | ------------------- | ----------------------------------- |
+| GET    | /api/health         | Confirm the API is running          |
+| GET    | /api/clients        | List clients, `?search=` to filter  |
+| POST   | /api/clients        | Create a client                     |
+| GET    | /api/clients/`<id>` | Read one client                     |
+| PUT    | /api/clients/`<id>` | Replace the details of a client     |
+| DELETE | /api/clients/`<id>` | Delete a client that has no invoice |
+
+`PUT` replaces the whole record, so send every field: any field left out
+is cleared.
+
+Anything other than GET, HEAD or OPTIONS needs a CSRF token. The server
+sets it in a `csrf_token` cookie on the first response, and the request
+has to repeat it in the `X-CSRF-Token` header. With curl that means
+keeping a cookie jar:
+
+```
+curl -c jar.txt http://127.0.0.1:5000/api/health
+curl -b jar.txt -X POST http://127.0.0.1:5000/api/clients -H "Content-Type: application/json" -H "X-CSRF-Token: PASTE_THE_COOKIE_VALUE" -d "{\"name\":\"Aurora Studio\",\"email\":\"hello@aurora.example\"}"
+```
+
 ## Project structure
 
 ```
@@ -76,10 +101,14 @@ InvoiceFlow/
         __init__.py      application factory
         cli.py           flask commands, such as init-db
         config.py        settings read from the environment
-        database.py      schema creation and SQLite setup
+        database.py      schema creation and session helpers
         errors.py        JSON error handlers
+        exceptions.py    errors the API answers with a status code
         extensions.py    shared SQLAlchemy instance
+        security.py      CSRF protection
+        validation.py    reusable field validators
         api/
+            clients.py   client endpoints
             health.py    health check endpoint
         models/
             client.py    client table
@@ -87,6 +116,8 @@ InvoiceFlow/
             line_item.py line items of an invoice
             mixins.py    timestamps and serialisation helpers
             types.py     exact decimal column type
+        services/
+            clients.py   client rules and persistence
     .env.example         every variable the app reads
     requirements.txt     pinned dependencies
     run.py               development entry point
