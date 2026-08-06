@@ -5,6 +5,7 @@ import os
 from flask import Flask
 
 from app.api.clients import clients_bp
+from app.api.dashboard import dashboard_bp
 from app.api.health import health_bp
 from app.api.invoices import invoices_bp
 from app.cli import register_cli
@@ -57,3 +58,4 @@ def _register_blueprints(app):
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(clients_bp, url_prefix="/api")
     app.register_blueprint(invoices_bp, url_prefix="/api")
+    app.register_blueprint(dashboard_bp, url_prefix="/api")

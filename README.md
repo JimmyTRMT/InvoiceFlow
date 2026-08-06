@@ -87,6 +87,7 @@ available at http://127.0.0.1:5000/api/health
 | PUT    | /api/invoices/`<id>`            | Replace an invoice          |
 | POST   | /api/invoices/`<id>`/mark-paid  | Record the invoice as paid  |
 | DELETE | /api/invoices/`<id>`            | Delete an invoice           |
+| GET    | /api/dashboard/stats            | Outstanding, cashed, overdue |
 
 The invoice list accepts `?status=draft|sent|paid|overdue`,
 `?client_id=<id>` and `?limit=<n>`.
@@ -98,6 +99,11 @@ Amounts are never read from the request. The server recomputes the line
 totals, the subtotal, the tax and the grand total from the line items,
 and it assigns the invoice number itself in the `INV-2026-001` form.
 `overdue` is computed from the due date, so it cannot be set by hand.
+
+The dashboard figures come from one aggregate query: everything not paid
+counts as outstanding, only payments recorded during the current month
+count as cashed, and the overdue count uses the same due date rule as
+the invoice list.
 
 Anything other than GET, HEAD or OPTIONS needs a CSRF token. The server
 sets it in a `csrf_token` cookie on the first response, and the request
@@ -125,6 +131,7 @@ InvoiceFlow/
         validation.py    reusable field validators
         api/
             clients.py   client endpoints
+            dashboard.py dashboard statistics endpoint
             health.py    health check endpoint
             invoices.py  invoice endpoints
         models/
@@ -135,6 +142,7 @@ InvoiceFlow/
             types.py     exact decimal column type
         services/
             clients.py   client rules and persistence
+            dashboard.py aggregated figures
             invoices.py  invoice rules, totals and numbering
     .env.example         every variable the app reads
     requirements.txt     pinned dependencies
