@@ -5,9 +5,8 @@ invoices. It keeps a list of clients, builds invoices with several line
 items, computes the totals, and shows what is outstanding, paid or
 overdue.
 
-This repository is a work in progress. The backend skeleton, the
-database models and the clients API are in place; the features are added
-step by step.
+This repository is a work in progress. The backend is in place: models,
+clients API and invoices API. The features are added step by step.
 
 ## Prerequisites
 
@@ -80,8 +79,25 @@ available at http://127.0.0.1:5000/api/health
 | PUT    | /api/clients/`<id>` | Replace the details of a client     |
 | DELETE | /api/clients/`<id>` | Delete a client that has no invoice |
 
+| Method | Path                            | What it does                |
+| ------ | ------------------------------- | --------------------------- |
+| GET    | /api/invoices                   | List invoices               |
+| POST   | /api/invoices                   | Create an invoice           |
+| GET    | /api/invoices/`<id>`            | Read one invoice with lines |
+| PUT    | /api/invoices/`<id>`            | Replace an invoice          |
+| POST   | /api/invoices/`<id>`/mark-paid  | Record the invoice as paid  |
+| DELETE | /api/invoices/`<id>`            | Delete an invoice           |
+
+The invoice list accepts `?status=draft|sent|paid|overdue`,
+`?client_id=<id>` and `?limit=<n>`.
+
 `PUT` replaces the whole record, so send every field: any field left out
 is cleared.
+
+Amounts are never read from the request. The server recomputes the line
+totals, the subtotal, the tax and the grand total from the line items,
+and it assigns the invoice number itself in the `INV-2026-001` form.
+`overdue` is computed from the due date, so it cannot be set by hand.
 
 Anything other than GET, HEAD or OPTIONS needs a CSRF token. The server
 sets it in a `csrf_token` cookie on the first response, and the request
@@ -110,6 +126,7 @@ InvoiceFlow/
         api/
             clients.py   client endpoints
             health.py    health check endpoint
+            invoices.py  invoice endpoints
         models/
             client.py    client table
             invoice.py   invoice table and statuses
@@ -118,6 +135,7 @@ InvoiceFlow/
             types.py     exact decimal column type
         services/
             clients.py   client rules and persistence
+            invoices.py  invoice rules, totals and numbering
     .env.example         every variable the app reads
     requirements.txt     pinned dependencies
     run.py               development entry point
