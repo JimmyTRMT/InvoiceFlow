@@ -88,9 +88,68 @@ body {
   color: var(--brand-600);
 }
 
+/* Status pills, the only place the state colours are defined. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  white-space: nowrap;
+}
+
+.badge--draft {
+  border-color: #e2e8f0;
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.badge--sent {
+  border-color: #bfdbfe;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+}
+
+.badge--paid {
+  border-color: #a7f3d0;
+  background-color: #ecfdf5;
+  color: #047857;
+}
+
+.badge--overdue {
+  border-color: #fecaca;
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
+/* Placeholder bars shown until the first API answer arrives. */
+.skeleton {
+  display: inline-block;
+  border-radius: 0.375rem;
+  background-color: #e2e8f0;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .app-sidebar,
   .nav-link {
     transition: none;
+  }
+
+  .skeleton {
+    animation: none;
   }
 }
