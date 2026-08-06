@@ -14,6 +14,7 @@ from app.database import register_database_events
 from app.errors import register_error_handlers
 from app.extensions import db
 from app.security import register_csrf_protection
+from app.views import web_bp
 
 
 def create_app(config_name=None):
@@ -54,7 +55,8 @@ def _ensure_instance_folder(app):
 
 
 def _register_blueprints(app):
-    """Mount every API blueprint under the /api prefix."""
+    """Mount the page routes and every API blueprint."""
+    app.register_blueprint(web_bp)
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(clients_bp, url_prefix="/api")
     app.register_blueprint(invoices_bp, url_prefix="/api")

@@ -41,6 +41,9 @@ class BaseConfig:
     HOST = os.environ.get("HOST", "127.0.0.1")
     PORT = _env_int("PORT", 5000)
 
+    # ISO 4217 code the interface uses to format every amount.
+    CURRENCY = os.environ.get("CURRENCY", "EUR")
+
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
 

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}InvoiceFlow{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='js/tailwind-config.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="h-full bg-slate-50 font-sans text-slate-800" data-currency="{{ currency }}">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <div id="sidebar-backdrop" class="fixed inset-0 z-30 hidden bg-slate-900/40 lg:hidden"></div>
+
+  <div class="lg:flex">
+    <aside id="sidebar"
+           class="app-sidebar fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col border-r border-slate-200 bg-white lg:sticky lg:top-0 lg:h-screen lg:translate-x-0">
+      <div class="flex h-16 items-center gap-3 px-5">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z">
+            </path>
+            <path d="M15 3v4h4"></path>
+            <path d="M9 13h6"></path>
+            <path d="M9 17h4"></path>
+          </svg>
+        </span>
+        <span class="text-base font-semibold tracking-tight text-slate-900">InvoiceFlow</span>
+      </div>
+
+      <nav class="flex-1 space-y-1 px-3 py-4" aria-label="Main">
+        <a class="nav-link" href="{{ url_for('web.dashboard') }}"
+           {% if request.endpoint == 'web.dashboard' %}aria-current="page"{% endif %}>
+          <svg class="nav-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="2"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="2"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="2"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="2"></rect>
+          </svg>
+          Dashboard
+        </a>
+
+        <a class="nav-link" href="{{ url_for('web.clients') }}"
+           {% if request.endpoint == 'web.clients' %}aria-current="page"{% endif %}>
+          <svg class="nav-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M16 19v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V19"></path>
+            <circle cx="9" cy="7.5" r="3.5"></circle>
+            <path d="M22 19v-1.5a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 4.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Clients
+        </a>
+
+        <a class="nav-link" href="{{ url_for('web.new_invoice') }}"
+           {% if request.endpoint == 'web.new_invoice' %}aria-current="page"{% endif %}>
+          <svg class="nav-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7Z"></path>
+            <path d="M14 3v4h4"></path>
+            <path d="M12 11v6"></path>
+            <path d="M9 14h6"></path>
+          </svg>
+          New invoice
+        </a>
+      </nav>
+
+      <p class="border-t border-slate-200 px-5 py-4 text-xs text-slate-400">
+        Invoicing for freelancers
+      </p>
+    </aside>
+
+    <div class="flex min-w-0 flex-1 flex-col">
+      <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200 bg-white px-4 lg:px-8">
+        <button id="sidebar-toggle" type="button" aria-controls="sidebar" aria-expanded="false"
+                class="-ml-1 rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 lg:hidden">
+          <span class="sr-only">Open the navigation</span>
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16"></path>
+            <path d="M4 12h16"></path>
+            <path d="M4 17h16"></path>
+          </svg>
+        </button>
+        <h1 class="truncate text-base font-semibold text-slate-900">{% block heading %}{% endblock %}</h1>
+        <div class="ml-auto flex items-center gap-3">{% block actions %}{% endblock %}</div>
+      </header>
+
+      <main id="main" class="flex-1 px-4 py-8 lg:px-8">
+        <div class="mx-auto w-full max-w-6xl">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="{{ url_for('static', filename='js/layout.js') }}"></script>
+</body>
+</html>

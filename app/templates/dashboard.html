@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - InvoiceFlow{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+
+{% block actions %}
+<a href="{{ url_for('web.new_invoice') }}"
+   class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-700">
+  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <path d="M12 5v14"></path>
+    <path d="M5 12h14"></path>
+  </svg>
+  New invoice
+</a>
+{% endblock %}
+
+{% block content %}
+<p class="max-w-2xl text-sm text-slate-500">
+  What is owed to you, what came in this month, and what is running late.
+</p>
+{% endblock %}

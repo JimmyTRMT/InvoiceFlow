@@ -5,8 +5,8 @@ invoices. It keeps a list of clients, builds invoices with several line
 items, computes the totals, and shows what is outstanding, paid or
 overdue.
 
-This repository is a work in progress. The backend is in place: models,
-clients API and invoices API. The features are added step by step.
+This repository is a work in progress. The backend is complete and the
+interface is being built page by page on top of it.
 
 ## Prerequisites
 
@@ -65,8 +65,12 @@ flask --app run.py init-db
 python run.py
 ```
 
-The server starts on http://127.0.0.1:5000 and the health check is
-available at http://127.0.0.1:5000/api/health
+Open http://127.0.0.1:5000 in a browser. The health check of the API is
+at http://127.0.0.1:5000/api/health
+
+Tailwind CSS and the Inter font are loaded from a CDN, so the interface
+needs an internet connection to look right. The application itself runs
+entirely on your machine.
 
 ## The API so far
 
@@ -129,6 +133,11 @@ InvoiceFlow/
         extensions.py    shared SQLAlchemy instance
         security.py      CSRF protection
         validation.py    reusable field validators
+        views.py         page routes
+        static/
+            css/         stylesheets
+            js/          browser scripts
+        templates/       page markup
         api/
             clients.py   client endpoints
             dashboard.py dashboard statistics endpoint
