@@ -88,6 +88,154 @@ body {
   color: var(--brand-600);
 }
 
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background-color: var(--brand-600);
+  color: #ffffff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--brand-700);
+}
+
+.btn--secondary {
+  border-color: #cbd5e1;
+  background-color: #ffffff;
+  color: #334155;
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background-color: #f8fafc;
+}
+
+.btn--danger {
+  background-color: #e11d48;
+  color: #ffffff;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background-color: #be123c;
+}
+
+/* Compact text button used inside table rows. */
+.btn--quiet {
+  padding: 0.25rem 0.5rem;
+  color: #475569;
+}
+
+.btn--quiet:hover:not(:disabled) {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn--quiet-danger {
+  color: #be123c;
+}
+
+.btn--quiet-danger:hover:not(:disabled) {
+  background-color: #fff1f2;
+  color: #9f1239;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  font-size: 0.875rem;
+  color: #0f172a;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.form-control::placeholder {
+  color: #94a3b8;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px var(--brand-100);
+}
+
+.form-control[aria-invalid="true"] {
+  border-color: #f87171;
+}
+
+dialog {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 0;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+}
+
+dialog::backdrop {
+  background-color: rgba(15, 23, 42, 0.45);
+}
+
+/* Transient confirmation of the last action, bottom of the screen. */
+.toast {
+  pointer-events: auto;
+  min-width: 15rem;
+  max-width: 22rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+  font-size: 0.875rem;
+  animation: toast-in 180ms ease-out;
+}
+
+.toast--success {
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.toast--error {
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Status pills, the only place the state colours are defined. */
 .badge {
   display: inline-flex;
@@ -149,7 +297,8 @@ body {
     transition: none;
   }
 
-  .skeleton {
+  .skeleton,
+  .toast {
     animation: none;
   }
 }

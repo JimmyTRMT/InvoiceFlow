@@ -2,6 +2,10 @@
 
 const LOCALE = navigator.language || 'en-US';
 const CURRENCY = document.body.dataset.currency || 'EUR';
+const TOAST_DURATION = 4000;
+
+const toastRegion = document.getElementById('toast-region');
+const toastTemplate = document.getElementById('toast-template');
 
 const STATUS_LABELS = {
   draft: 'Draft',
@@ -67,4 +71,13 @@ export function formatMonth(isoMonth) {
 export function applyStatus(element, status) {
   element.textContent = STATUS_LABELS[status] || status;
   element.className = `badge badge--${status}`;
+}
+
+// Announce the outcome of an action, then get out of the way.
+export function showToast(message, tone = 'success') {
+  const toast = toastTemplate.content.firstElementChild.cloneNode(true);
+  toast.classList.add(`toast--${tone}`);
+  toast.querySelector('[data-field="message"]').textContent = message;
+  toastRegion.append(toast);
+  window.setTimeout(() => toast.remove(), TOAST_DURATION);
 }

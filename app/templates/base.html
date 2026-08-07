@@ -100,6 +100,15 @@
     </div>
   </div>
 
+  <div id="toast-region" aria-live="polite"
+       class="pointer-events-none fixed inset-x-4 bottom-4 z-50 flex flex-col items-center gap-2 sm:inset-x-auto sm:right-6 sm:items-end"></div>
+
+  <template id="toast-template">
+    <div class="toast" role="status">
+      <span data-field="message"></span>
+    </div>
+  </template>
+
   <script type="module" src="{{ url_for('static', filename='js/layout.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>

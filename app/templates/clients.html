@@ -3,8 +3,145 @@
 {% block title %}Clients - InvoiceFlow{% endblock %}
 {% block heading %}Clients{% endblock %}
 
+{% block actions %}
+<button type="button" id="client-new" class="btn btn--primary">
+  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <path d="M12 5v14"></path>
+    <path d="M5 12h14"></path>
+  </svg>
+  New client
+</button>
+{% endblock %}
+
 {% block content %}
 <p class="max-w-2xl text-sm text-slate-500">
   Everyone you bill, with the details that end up printed on an invoice.
 </p>
+
+<div class="mt-6 max-w-sm">
+  <label class="sr-only" for="client-search">Search clients</label>
+  <div class="relative">
+    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m20 20-3.5-3.5"></path>
+      </svg>
+    </span>
+    <input id="client-search" type="search" autocomplete="off"
+           class="form-control pl-9" placeholder="Search by name, company or email">
+  </div>
+</div>
+
+<p id="clients-error" hidden
+   class="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+   role="alert"></p>
+
+<section class="mt-4 rounded-xl border border-slate-200 bg-white shadow-card">
+  <div id="clients-table" class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="text-left text-xs uppercase tracking-wide text-slate-400">
+        <tr>
+          <th scope="col" class="px-5 py-3 font-medium">Client</th>
+          <th scope="col" class="px-5 py-3 font-medium">Email</th>
+          <th scope="col" class="hidden px-5 py-3 font-medium lg:table-cell">Address</th>
+          <th scope="col" class="px-5 py-3 text-right font-medium">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="clients-body" class="divide-y divide-slate-100">
+        {% for _ in range(3) %}
+        <tr aria-hidden="true">
+          <td class="px-5 py-4"><span class="skeleton h-4 w-40"></span></td>
+          <td class="px-5 py-4"><span class="skeleton h-4 w-48"></span></td>
+          <td class="hidden px-5 py-4 lg:table-cell"><span class="skeleton h-4 w-32"></span></td>
+          <td class="px-5 py-4 text-right"><span class="skeleton h-4 w-24"></span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p id="clients-empty" hidden class="px-5 py-12 text-center text-sm text-slate-500"></p>
+</section>
+
+<template id="client-row-template">
+  <tr class="hover:bg-slate-50">
+    <td class="px-5 py-3.5">
+      <span class="block font-medium text-slate-900" data-field="name"></span>
+      <span class="block text-xs text-slate-500" data-field="company"></span>
+    </td>
+    <td class="px-5 py-3.5 text-slate-600" data-field="email"></td>
+    <td class="hidden max-w-xs truncate px-5 py-3.5 text-slate-500 lg:table-cell" data-field="address"></td>
+    <td class="whitespace-nowrap px-5 py-3.5 text-right">
+      <button type="button" class="btn btn--quiet" data-action="edit">Edit</button>
+      <button type="button" class="btn btn--quiet btn--quiet-danger" data-action="delete">Delete</button>
+    </td>
+  </tr>
+</template>
+
+<dialog id="client-dialog" class="w-11/12 max-w-lg" aria-labelledby="client-dialog-title">
+  <form id="client-form" class="flex flex-col gap-5 p-6" novalidate>
+    <div>
+      <h2 id="client-dialog-title" class="text-base font-semibold text-slate-900">New client</h2>
+      <p class="mt-1 text-sm text-slate-500">
+        These details are printed on every invoice you send them.
+      </p>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        <label class="form-label" for="client-name">Name</label>
+        <input class="form-control" id="client-name" name="name" type="text"
+               autocomplete="off" placeholder="Aurora Studio">
+        <p class="mt-1.5 text-xs text-rose-600" data-error="name" hidden></p>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="form-label" for="client-email">Email</label>
+        <input class="form-control" id="client-email" name="email" type="email"
+               autocomplete="off" placeholder="billing@aurora.example">
+        <p class="mt-1.5 text-xs text-rose-600" data-error="email" hidden></p>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="form-label" for="client-company">Company</label>
+        <input class="form-control" id="client-company" name="company" type="text"
+               autocomplete="off" placeholder="Optional">
+        <p class="mt-1.5 text-xs text-rose-600" data-error="company" hidden></p>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="form-label" for="client-address">Address</label>
+        <textarea class="form-control" id="client-address" name="address" rows="3"
+                  placeholder="Optional"></textarea>
+        <p class="mt-1.5 text-xs text-rose-600" data-error="address" hidden></p>
+      </div>
+    </div>
+
+    <p id="client-form-error" hidden
+       class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
+       role="alert"></p>
+
+    <div class="flex justify-end gap-3">
+      <button type="button" id="client-cancel" class="btn btn--secondary">Cancel</button>
+      <button type="submit" id="client-submit" class="btn btn--primary">Create client</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="confirm-dialog" class="w-11/12 max-w-sm" aria-labelledby="confirm-title">
+  <form method="dialog" class="flex flex-col gap-4 p-6">
+    <h2 id="confirm-title" class="text-base font-semibold text-slate-900">Delete this client</h2>
+    <p id="confirm-message" class="text-sm text-slate-500"></p>
+    <div class="flex justify-end gap-3">
+      <button type="submit" value="cancel" class="btn btn--secondary">Cancel</button>
+      <button type="submit" value="confirm" class="btn btn--danger">Delete</button>
+    </div>
+  </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/clients.js') }}"></script>
 {% endblock %}
