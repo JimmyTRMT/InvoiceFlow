@@ -44,6 +44,11 @@ class BaseConfig:
     # ISO 4217 code the interface uses to format every amount.
     CURRENCY = os.environ.get("CURRENCY", "EUR")
 
+    # Whoever is sending the invoices, printed at the top of each one.
+    BUSINESS_NAME = os.environ.get("BUSINESS_NAME", "InvoiceFlow")
+    BUSINESS_EMAIL = os.environ.get("BUSINESS_EMAIL", "")
+    BUSINESS_ADDRESS = os.environ.get("BUSINESS_ADDRESS", "")
+
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
 

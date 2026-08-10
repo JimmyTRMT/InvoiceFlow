@@ -1,8 +1,9 @@
 // Invoice creation: dynamic line items, live totals and submission.
 
 import { ApiError, getJson, postJson } from './api.js';
-import { formatMoney, showToast } from './ui.js';
+import { formatMoney } from './ui.js';
 
+const INVOICE_PATH = '/invoices/';
 const DEFAULT_DUE_DAYS = 30;
 const LINE_ERROR = /^line_items\[(\d+)\]\.(\w+)$/;
 
@@ -152,13 +153,6 @@ function applyDefaultDates() {
   dueDateInput.value = isoDate(due);
 }
 
-function resetForm() {
-  form.reset();
-  applyDefaultDates();
-  linesContainer.replaceChildren();
-  addRow();
-}
-
 async function loadClients() {
   try {
     const clients = await getJson('/clients');
@@ -204,8 +198,7 @@ async function submitForm(event) {
   submitButton.disabled = true;
   try {
     const invoice = await postJson('/invoices', payload);
-    showToast(`Invoice ${invoice.number} created.`);
-    resetForm();
+    window.location.assign(`${INVOICE_PATH}${invoice.id}`);
   } catch (error) {
     applyServerErrors(error, sentRows);
     showFormError(error, 'The invoice could not be saved.');

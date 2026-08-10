@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice - InvoiceFlow{% endblock %}
+{% block heading %}Invoice{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" media="print"
+      href="{{ url_for('static', filename='css/print.css') }}">
+{% endblock %}
+
+{% block actions %}
+<div id="invoice-actions" class="flex items-center gap-2" hidden>
+  <button type="button" id="mark-paid" class="btn btn--secondary" hidden>Mark as paid</button>
+  <button type="button" id="print-invoice" class="btn btn--secondary">Print</button>
+  <button type="button" id="delete-invoice" class="btn btn--quiet btn--quiet-danger">
+    Delete
+  </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div data-invoice-id="{{ invoice_id }}" hidden></div>
+
+<p id="invoice-loading" class="text-sm text-slate-500">Loading the invoice.</p>
+
+<div id="invoice-error" hidden
+     class="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-card">
+  <p class="text-sm text-slate-600" data-field="error-message"></p>
+  <a href="{{ url_for('web.dashboard') }}" class="btn btn--primary mt-5">
+    Back to the dashboard
+  </a>
+</div>
+
+<article id="invoice-sheet" hidden
+         class="invoice-sheet mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-6 shadow-card sm:p-10">
+  <header class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <p class="text-base font-semibold text-slate-900">{{ business.name }}</p>
+      {% if business.address %}
+      <p class="mt-1 whitespace-pre-line text-sm text-slate-500">{{ business.address }}</p>
+      {% endif %}
+      {% if business.email %}
+      <p class="mt-1 text-sm text-slate-500">{{ business.email }}</p>
+      {% endif %}
+    </div>
+
+    <div class="sm:text-right">
+      <p class="text-xs uppercase tracking-widest text-slate-400">Invoice</p>
+      <p class="mt-1 text-xl font-semibold tracking-tight text-slate-900"
+         data-field="number"></p>
+      <p class="mt-2"><span class="badge" data-field="status"></span></p>
+    </div>
+  </header>
+
+  <div class="mt-8 grid gap-6 border-t border-slate-200 pt-8 sm:grid-cols-2">
+    <div>
+      <p class="text-xs uppercase tracking-widest text-slate-400">Billed to</p>
+      <p class="mt-2 font-medium text-slate-900" data-field="client-name"></p>
+      <p class="text-sm text-slate-500" data-field="client-company"></p>
+      <p class="mt-1 whitespace-pre-line text-sm text-slate-500" data-field="client-address"></p>
+      <p class="mt-1 text-sm text-slate-500" data-field="client-email"></p>
+    </div>
+
+    <dl class="space-y-2 text-sm sm:text-right">
+      <div class="sm:flex sm:justify-end sm:gap-3">
+        <dt class="text-slate-400">Issue date</dt>
+        <dd class="font-medium text-slate-900" data-field="issue-date"></dd>
+      </div>
+      <div class="sm:flex sm:justify-end sm:gap-3">
+        <dt class="text-slate-400">Due date</dt>
+        <dd class="font-medium text-slate-900" data-field="due-date"></dd>
+      </div>
+      <div class="sm:flex sm:justify-end sm:gap-3" data-field="paid-row" hidden>
+        <dt class="text-slate-400">Paid on</dt>
+        <dd class="font-medium text-slate-900" data-field="paid-at"></dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="mt-8 overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-400">
+        <tr>
+          <th scope="col" class="py-2 pr-4 font-medium">Description</th>
+          <th scope="col" class="py-2 px-4 text-right font-medium">Qty</th>
+          <th scope="col" class="py-2 px-4 text-right font-medium">Unit price</th>
+          <th scope="col" class="py-2 pl-4 text-right font-medium">Amount</th>
+        </tr>
+      </thead>
+      <tbody id="invoice-lines" class="divide-y divide-slate-100"></tbody>
+    </table>
+  </div>
+
+  <div class="mt-6 flex justify-end">
+    <dl class="w-full max-w-xs space-y-2 text-sm">
+      <div class="flex justify-between gap-4">
+        <dt class="text-slate-500">Subtotal</dt>
+        <dd class="font-medium text-slate-900" data-field="subtotal"></dd>
+      </div>
+      <div class="flex justify-between gap-4">
+        <dt class="text-slate-500">Tax <span data-field="tax-rate"></span></dt>
+        <dd class="font-medium text-slate-900" data-field="tax-amount"></dd>
+      </div>
+      <div class="flex justify-between gap-4 border-t border-slate-300 pt-2">
+        <dt class="font-semibold text-slate-900">Total due</dt>
+        <dd class="text-lg font-semibold text-slate-900" data-field="total"></dd>
+      </div>
+    </dl>
+  </div>
+
+  <section class="mt-8 border-t border-slate-200 pt-6" data-field="notes-block" hidden>
+    <p class="text-xs uppercase tracking-widest text-slate-400">Notes</p>
+    <p class="mt-2 whitespace-pre-line text-sm text-slate-600" data-field="notes"></p>
+  </section>
+</article>
+
+<template id="invoice-line-template">
+  <tr>
+    <td class="py-3 pr-4 text-slate-900" data-field="description"></td>
+    <td class="py-3 px-4 text-right text-slate-500" data-field="quantity"></td>
+    <td class="py-3 px-4 text-right text-slate-500" data-field="unit-price"></td>
+    <td class="py-3 pl-4 text-right font-medium text-slate-900" data-field="amount"></td>
+  </tr>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/invoice-detail.js') }}"></script>
+{% endblock %}

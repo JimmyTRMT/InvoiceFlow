@@ -1,0 +1,58 @@
+/* Printing rules for the invoice page, loaded with media="print". */
+
+@page {
+  margin: 16mm;
+}
+
+/* These carry Tailwind utilities, so overriding them needs !important. */
+.app-sidebar,
+.app-header,
+#sidebar-backdrop,
+#toast-region,
+.skip-link,
+.no-print {
+  display: none !important;
+}
+
+body {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+main {
+  padding: 0 !important;
+}
+
+/* The sheet is the page now, so it drops its on screen chrome. */
+.invoice-sheet {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.invoice-sheet table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-sheet thead {
+  display: table-header-group;
+}
+
+.invoice-sheet tr {
+  page-break-inside: avoid;
+}
+
+/* Keep the status colour, which printers strip out by default. */
+.badge {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}

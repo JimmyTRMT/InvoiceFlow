@@ -5,6 +5,7 @@ import { applyStatus, formatDate, formatMonth, formatMoney } from './ui.js';
 
 const RECENT_LIMIT = 6;
 const UNAVAILABLE = 'n/a';
+const INVOICE_PATH = '/invoices/';
 
 const errorBanner = document.getElementById('dashboard-error');
 const tableWrapper = document.getElementById('recent-invoices-table');
@@ -29,7 +30,9 @@ function buildRow(invoice) {
   const row = rowTemplate.content.firstElementChild.cloneNode(true);
   const field = (name) => row.querySelector(`[data-field="${name}"]`);
 
-  field('number').textContent = invoice.number;
+  const link = field('link');
+  link.textContent = invoice.number;
+  link.href = `${INVOICE_PATH}${invoice.id}`;
   field('client').textContent = invoice.client ? invoice.client.name : '';
   field('issue-date').textContent = formatDate(invoice.issue_date);
   field('due-date').textContent = formatDate(invoice.due_date);

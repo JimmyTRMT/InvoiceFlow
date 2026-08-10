@@ -26,9 +26,7 @@ def list_invoices():
         client_id=request.args.get("client_id", type=int),
         limit=_read_limit(),
     )
-    payload = [
-        invoice.to_dict(include_line_items=False) for invoice in invoices
-    ]
+    payload = [invoice.to_dict(detailed=False) for invoice in invoices]
     return jsonify(payload), 200
 
 

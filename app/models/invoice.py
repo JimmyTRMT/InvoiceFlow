@@ -108,13 +108,13 @@ class Invoice(db.Model, TimestampMixin):
         )
         self.total = self.subtotal + self.tax_amount
 
-    def to_dict(self, include_line_items=True):
-        """Serialise the invoice for the JSON API."""
+    def to_dict(self, detailed=True):
+        """Serialise the invoice, in full or in its lighter list form."""
         payload = {
             "id": self.id,
             "number": self.number,
             "client_id": self.client_id,
-            "client": self.client.summary() if self.client else None,
+            "client": self._client_payload(detailed),
             "issue_date": to_iso(self.issue_date),
             "due_date": to_iso(self.due_date),
             "status": self.status,
@@ -129,11 +129,17 @@ class Invoice(db.Model, TimestampMixin):
             "created_at": to_iso(self.created_at),
             "updated_at": to_iso(self.updated_at),
         }
-        if include_line_items:
+        if detailed:
             payload["line_items"] = [
                 item.to_dict() for item in self.line_items
             ]
         return payload
+
+    def _client_payload(self, detailed):
+        """Embed the whole client only when the invoice is read on its own."""
+        if self.client is None:
+            return None
+        return self.client.to_dict() if detailed else self.client.summary()
 
     def __repr__(self):
         """Return the readable form used in the shell and in logs."""

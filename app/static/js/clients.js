@@ -1,7 +1,7 @@
 // Client list, search, and the dialog used to create or edit a client.
 
 import { ApiError, deleteJson, getJson, postJson, putJson } from './api.js';
-import { showToast } from './ui.js';
+import { askConfirmation, showToast } from './ui.js';
 
 const SEARCH_DELAY = 250;
 const FIELDS = ['name', 'email', 'company', 'address'];
@@ -18,9 +18,6 @@ const form = document.getElementById('client-form');
 const dialogTitle = document.getElementById('client-dialog-title');
 const submitButton = document.getElementById('client-submit');
 const formError = document.getElementById('client-form-error');
-
-const confirmDialog = document.getElementById('confirm-dialog');
-const confirmMessage = document.getElementById('confirm-message');
 
 let editingId = null;
 let searchTimer = null;
@@ -66,24 +63,12 @@ function openForm(client) {
   form.elements.name.focus();
 }
 
-// Resolve once the dialog closes, whichever button or key closed it.
-function askConfirmation(message) {
-  confirmMessage.textContent = message;
-  confirmDialog.returnValue = 'cancel';
-  confirmDialog.showModal();
-  return new Promise((resolve) => {
-    confirmDialog.addEventListener(
-      'close',
-      () => resolve(confirmDialog.returnValue === 'confirm'),
-      { once: true }
-    );
-  });
-}
-
 async function removeClient(client) {
-  const accepted = await askConfirmation(
-    `${client.name} will be removed for good.`
-  );
+  const accepted = await askConfirmation({
+    title: 'Delete this client',
+    message: `${client.name} will be removed for good.`,
+    confirmLabel: 'Delete client',
+  });
   if (!accepted) {
     return;
   }

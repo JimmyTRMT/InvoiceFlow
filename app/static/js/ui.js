@@ -7,6 +7,11 @@ const TOAST_DURATION = 4000;
 const toastRegion = document.getElementById('toast-region');
 const toastTemplate = document.getElementById('toast-template');
 
+const confirmDialog = document.getElementById('confirm-dialog');
+const confirmTitle = document.getElementById('confirm-title');
+const confirmMessage = document.getElementById('confirm-message');
+const confirmAccept = document.getElementById('confirm-accept');
+
 const STATUS_LABELS = {
   draft: 'Draft',
   sent: 'Sent',
@@ -71,6 +76,23 @@ export function formatMonth(isoMonth) {
 export function applyStatus(element, status) {
   element.textContent = STATUS_LABELS[status] || status;
   element.className = `badge badge--${status}`;
+}
+
+// Resolve once the dialog closes, whichever button or key closed it.
+export function askConfirmation({ title, message, confirmLabel }) {
+  confirmTitle.textContent = title;
+  confirmMessage.textContent = message;
+  confirmAccept.textContent = confirmLabel;
+  confirmDialog.returnValue = 'cancel';
+  confirmDialog.showModal();
+
+  return new Promise((resolve) => {
+    confirmDialog.addEventListener(
+      'close',
+      () => resolve(confirmDialog.returnValue === 'confirm'),
+      { once: true }
+    );
+  });
 }
 
 // Announce the outcome of an action, then get out of the way.
