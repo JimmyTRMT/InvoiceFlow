@@ -47,6 +47,20 @@
           Dashboard
         </a>
 
+        <a class="nav-link" href="{{ url_for('web.invoice_list') }}"
+           {% if request.endpoint in ['web.invoice_list', 'web.invoice_detail', 'web.new_invoice'] %}aria-current="page"{% endif %}>
+          <svg class="nav-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 6h.01"></path>
+            <path d="M3 12h.01"></path>
+            <path d="M3 18h.01"></path>
+            <path d="M8 6h13"></path>
+            <path d="M8 12h13"></path>
+            <path d="M8 18h13"></path>
+          </svg>
+          Invoices
+        </a>
+
         <a class="nav-link" href="{{ url_for('web.clients') }}"
            {% if request.endpoint == 'web.clients' %}aria-current="page"{% endif %}>
           <svg class="nav-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -57,18 +71,6 @@
             <path d="M16 4.13a4 4 0 0 1 0 7.75"></path>
           </svg>
           Clients
-        </a>
-
-        <a class="nav-link" href="{{ url_for('web.new_invoice') }}"
-           {% if request.endpoint == 'web.new_invoice' %}aria-current="page"{% endif %}>
-          <svg class="nav-icon h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7Z"></path>
-            <path d="M14 3v4h4"></path>
-            <path d="M12 11v6"></path>
-            <path d="M9 14h6"></path>
-          </svg>
-          New invoice
         </a>
       </nav>
 

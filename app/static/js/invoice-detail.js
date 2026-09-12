@@ -1,5 +1,3 @@
-// Renders one invoice as a printable sheet and drives its actions.
-
 import { ApiError, deleteJson, getJson, postJson } from './api.js';
 import {
   applyStatus,
@@ -9,7 +7,7 @@ import {
   showToast,
 } from './ui.js';
 
-const DASHBOARD_URL = '/';
+const LIST_URL = '/invoices';
 
 const invoiceId = document.querySelector('[data-invoice-id]').dataset.invoiceId;
 
@@ -115,7 +113,7 @@ async function removeInvoice() {
 
   try {
     await deleteJson(`/invoices/${invoiceId}`);
-    window.location.assign(DASHBOARD_URL);
+    window.location.assign(LIST_URL);
   } catch (error) {
     showToast(
       error instanceof ApiError

@@ -1,14 +1,22 @@
-"IN PROGRESS"
-
 # InvoiceFlow
 
-A small web application for freelancers to create, track and export
+A small web application for freelancers to create, track and print
 invoices. It keeps a list of clients, builds invoices with several line
 items, computes the totals, and shows what is outstanding, paid or
 overdue.
 
-This repository is a work in progress. The backend is complete and the
-interface is being built page by page on top of it.
+Flask and SQLAlchemy on the server, a JSON API in the middle, and plain
+ES modules in the browser. No build step and no frontend framework.
+
+## What it does
+
+- Keep a searchable list of clients, created and edited in place
+- Build an invoice from any number of line items, with a live total
+- Number invoices per year, in the `INV-2026-001` form
+- Track a status of draft, sent or paid, and flag what is overdue
+- Filter the invoice list by status and by client
+- Print an invoice from a stylesheet made for paper
+- Show what is outstanding, what was cashed this month and what is late
 
 ## Prerequisites
 
@@ -74,7 +82,21 @@ Tailwind CSS and the Inter font are loaded from a CDN, so the interface
 needs an internet connection to look right. The application itself runs
 entirely on your machine.
 
-## The API so far
+## Pages
+
+| Path            | What you can do there                          |
+| --------------- | ---------------------------------------------- |
+| /               | The three figures and the six latest invoices   |
+| /invoices       | The whole list, filtered by status and client   |
+| /invoices/new   | Build an invoice and watch the total add up     |
+| /invoices/`<id>`| Read it, print it, mark it paid or delete it    |
+| /clients        | Search, create, edit and delete a client        |
+
+Every page loads its own ES module, asks the API for what it needs, and
+renders rows by cloning a `<template>` declared in the markup. Nothing
+is built as an HTML string, so a client name is always shown as text.
+
+## The API
 
 | Method | Path                | What it does                        |
 | ------ | ------------------- | ----------------------------------- |
@@ -104,7 +126,9 @@ is cleared.
 Amounts are never read from the request. The server recomputes the line
 totals, the subtotal, the tax and the grand total from the line items,
 and it assigns the invoice number itself in the `INV-2026-001` form.
-`overdue` is computed from the due date, so it cannot be set by hand.
+A stored status is `draft`, `sent` or `paid`. `overdue` is never stored:
+it is derived from a sent invoice whose due date has passed. A draft
+never reached the client, so it is neither late nor counted as owed.
 
 The dashboard figures come from one aggregate query: everything not paid
 counts as outstanding, only payments recorded during the current month
@@ -137,9 +161,26 @@ InvoiceFlow/
         validation.py    reusable field validators
         views.py         page routes
         static/
-            css/         stylesheets
-            js/          browser scripts
-        templates/       page markup
+            css/
+                app.css      design tokens and components
+                print.css    paper rules for one invoice
+            js/
+                api.js       fetch wrapper and CSRF header
+                ui.js        money, dates, badges, toasts, dialogs
+                layout.js    off canvas sidebar
+                dashboard.js figures and latest invoices
+                invoices.js  list, status and client filters
+                invoice-form.js    line items and live totals
+                invoice-detail.js  one invoice and its actions
+                clients.js   list, search and the client dialog
+        templates/
+            base.html          shell, navigation, toasts, dialog
+            dashboard.html     landing page
+            invoices.html      invoice list
+            invoice_form.html  invoice creation
+            invoice_detail.html printable invoice
+            clients.html       client management
+            error.html         404 and 500 page
         api/
             clients.py   client endpoints
             dashboard.py dashboard statistics endpoint
