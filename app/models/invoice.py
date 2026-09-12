@@ -1,5 +1,3 @@
-"""Invoice model and the statuses an invoice can hold."""
-
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from enum import Enum
@@ -11,21 +9,18 @@ from app.models.types import TWO_PLACES, ExactDecimal
 OVERDUE_STATUS = "overdue"
 
 
+# Only these three are stored; overdue is derived from the due date.
 class InvoiceStatus(str, Enum):
-    """The statuses a user is allowed to store on an invoice."""
-
     DRAFT = "draft"
     SENT = "sent"
     PAID = "paid"
 
     @classmethod
     def values(cls):
-        """List the accepted column values."""
         return [status.value for status in cls]
 
 
 def _status_check_constraint():
-    """Build the status constraint from the enum so both stay in sync."""
     allowed = ", ".join(f"'{value}'" for value in InvoiceStatus.values())
     return db.CheckConstraint(
         f"status IN ({allowed})", name="ck_invoices_status"
@@ -33,8 +28,6 @@ def _status_check_constraint():
 
 
 class Invoice(db.Model, TimestampMixin):
-    """An invoice with its client, its line items and its amounts."""
-
     __tablename__ = "invoices"
     __table_args__ = (
         _status_check_constraint(),
@@ -83,20 +76,18 @@ class Invoice(db.Model, TimestampMixin):
         order_by="InvoiceLineItem.id",
     )
 
+    # A draft never reached the client, so it cannot be late.
     @property
     def is_overdue(self):
-        """Tell whether the invoice is unpaid and past its due date."""
-        if self.status == InvoiceStatus.PAID.value:
+        if self.status != InvoiceStatus.SENT.value:
             return False
         return self.due_date is not None and self.due_date < date.today()
 
     @property
     def effective_status(self):
-        """Return the status shown to the user, overdue included."""
         return OVERDUE_STATUS if self.is_overdue else self.status
 
     def recalculate_totals(self):
-        """Recompute the amounts from the line items and the tax rate."""
         subtotal = Decimal("0")
         for item in self.line_items:
             subtotal += item.line_total
@@ -109,7 +100,6 @@ class Invoice(db.Model, TimestampMixin):
         self.total = self.subtotal + self.tax_amount
 
     def to_dict(self, detailed=True):
-        """Serialise the invoice, in full or in its lighter list form."""
         payload = {
             "id": self.id,
             "number": self.number,
@@ -135,12 +125,11 @@ class Invoice(db.Model, TimestampMixin):
             ]
         return payload
 
+    # The full client is only worth sending when the invoice is read alone.
     def _client_payload(self, detailed):
-        """Embed the whole client only when the invoice is read on its own."""
         if self.client is None:
             return None
         return self.client.to_dict() if detailed else self.client.summary()
 
     def __repr__(self):
-        """Return the readable form used in the shell and in logs."""
         return f"<Invoice {self.number} {self.status}>"

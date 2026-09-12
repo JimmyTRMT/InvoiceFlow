@@ -1,5 +1,3 @@
-"""Business rules for the invoice resource."""
-
 from datetime import date
 from decimal import Decimal
 
@@ -34,16 +32,16 @@ MAX_QUANTITY = Decimal("100000")
 MAX_UNIT_PRICE = Decimal("1000000")
 
 
+# Shared by the list filter and the dashboard count so both agree, and
+# kept in step with Invoice.is_overdue.
 def overdue_clause():
-    """Build the SQL condition that defines an overdue invoice."""
     return and_(
-        Invoice.status != InvoiceStatus.PAID.value,
+        Invoice.status == InvoiceStatus.SENT.value,
         Invoice.due_date < date.today(),
     )
 
 
 def _sequence_of(number, prefix):
-    """Return the numeric part of an invoice number, or zero."""
     try:
         return int(number[len(prefix):])
     except ValueError:
@@ -51,7 +49,6 @@ def _sequence_of(number, prefix):
 
 
 def generate_invoice_number(issue_date):
-    """Build the next sequential number for the year of the invoice."""
     prefix = f"INV-{issue_date.year}-"
     # Read the numbers rather than a SQL MAX, which would compare them
     # as text and break once the sequence reaches four digits.
@@ -65,7 +62,6 @@ def generate_invoice_number(issue_date):
 
 
 def _client_id(data, errors):
-    """Read the client reference and check that the client exists."""
     value = data.get("client_id")
     if isinstance(value, str) and value.strip().isdigit():
         value = int(value.strip())
@@ -79,7 +75,6 @@ def _client_id(data, errors):
 
 
 def _parse_line_items(data, errors):
-    """Read the line items, rejecting an empty or malformed list."""
     rows = data.get("line_items")
     if not isinstance(rows, list) or not rows:
         errors["line_items"] = "Add at least one line item."
@@ -96,6 +91,7 @@ def _parse_line_items(data, errors):
             errors[f"line_items[{index}]"] = "This line is not readable."
             continue
 
+        # Errors are indexed by row so the form can point at the right one.
         row_errors = {}
         item = {
             "description": required_string(
@@ -124,7 +120,6 @@ def _parse_line_items(data, errors):
 
 
 def parse_invoice_payload(data):
-    """Turn a request body into validated invoice fields."""
     errors = {}
     fields = {
         "client_id": _client_id(data, errors),
@@ -159,8 +154,8 @@ def parse_invoice_payload(data):
     return fields
 
 
+# The payment date only exists while the invoice is paid.
 def _apply_status(invoice, status):
-    """Set the status and keep the payment date consistent with it."""
     invoice.status = status
     if status == InvoiceStatus.PAID.value:
         invoice.paid_at = invoice.paid_at or utcnow()
@@ -169,14 +164,12 @@ def _apply_status(invoice, status):
 
 
 def _replace_line_items(invoice, rows):
-    """Rebuild the line items of an invoice from validated rows."""
     invoice.line_items.clear()
     for row in rows:
         invoice.line_items.append(InvoiceLineItem(**row))
 
 
 def list_invoices(status=None, client_id=None, limit=None):
-    """Return the invoices, newest first, with the given filters."""
     statement = (
         select(Invoice)
         .options(selectinload(Invoice.client))
@@ -194,14 +187,12 @@ def list_invoices(status=None, client_id=None, limit=None):
 
 
 def get_invoice(invoice_id):
-    """Return an invoice, or raise a 404 if the id does not exist."""
     return db.get_or_404(
         Invoice, invoice_id, description="This invoice does not exist."
     )
 
 
 def create_invoice(data):
-    """Create an invoice with its line items and its computed totals."""
     fields = parse_invoice_payload(data)
     invoice = Invoice(
         number=generate_invoice_number(fields["issue_date"]),
@@ -219,6 +210,7 @@ def create_invoice(data):
     try:
         commit_or_rollback("create the invoice")
     except IntegrityError as error:
+        # Two invoices created at the same instant can pick the same number.
         raise ConflictError(
             "That invoice number was just taken, please try again."
         ) from error
@@ -226,7 +218,6 @@ def create_invoice(data):
 
 
 def update_invoice(invoice, data):
-    """Replace the content of an invoice and recompute its totals."""
     fields = parse_invoice_payload(data)
     # The number is issued once and never rewritten, even if the issue
     # date moves to another year.
@@ -244,7 +235,6 @@ def update_invoice(invoice, data):
 
 
 def mark_invoice_paid(invoice):
-    """Mark an invoice as paid, leaving an already paid one untouched."""
     if invoice.status == InvoiceStatus.PAID.value:
         return invoice
     _apply_status(invoice, InvoiceStatus.PAID.value)
@@ -253,6 +243,5 @@ def mark_invoice_paid(invoice):
 
 
 def delete_invoice(invoice):
-    """Delete an invoice together with its line items."""
     db.session.delete(invoice)
     commit_or_rollback("delete the invoice")

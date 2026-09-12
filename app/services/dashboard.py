@@ -1,5 +1,3 @@
-"""Aggregated figures shown on the dashboard."""
-
 from datetime import date, datetime, time
 
 from sqlalchemy import and_, case, func, select
@@ -10,7 +8,6 @@ from app.services.invoices import overdue_clause
 
 
 def _month_bounds(today):
-    """Return the first instant of this month and of the next one."""
     start = today.replace(day=1)
     if start.month == 12:
         next_start = start.replace(year=start.year + 1, month=1)
@@ -22,23 +19,22 @@ def _month_bounds(today):
 
 
 def _amount_when(condition):
-    """Sum the invoice totals that match a condition, zero otherwise."""
     return func.coalesce(
         func.sum(case((condition, Invoice.total), else_=0)), 0
     )
 
 
 def _count_when(condition):
-    """Count the invoices that match a condition."""
     return func.coalesce(func.sum(case((condition, 1), else_=0)), 0)
 
 
+# One aggregate query rather than three, and no row ever loaded.
 def get_dashboard_stats():
-    """Compute the dashboard figures in one aggregate query."""
     today = date.today()
     month_start, next_month_start = _month_bounds(today)
 
-    unpaid = Invoice.status != InvoiceStatus.PAID.value
+    # A draft is not owed yet, so only what was sent counts as due.
+    awaiting_payment = Invoice.status == InvoiceStatus.SENT.value
     # Payment dates are stored in UTC while the month comes from the
     # local calendar, which can only shift a payment made within hours
     # of a month boundary.
@@ -50,7 +46,7 @@ def get_dashboard_stats():
 
     row = db.session.execute(
         select(
-            _amount_when(unpaid).label("outstanding_total"),
+            _amount_when(awaiting_payment).label("outstanding_total"),
             _amount_when(cashed_this_month).label("paid_this_month"),
             _count_when(overdue_clause()).label("overdue_count"),
         )
