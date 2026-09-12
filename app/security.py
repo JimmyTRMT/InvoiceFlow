@@ -1,5 +1,3 @@
-"""CSRF protection based on the double submit cookie pattern."""
-
 import secrets
 
 from flask import abort, request
@@ -10,7 +8,6 @@ SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 
 def _tokens_match(cookie_token, header_token):
-    """Compare the two tokens without leaking timing information."""
     if not cookie_token or not header_token:
         return False
     return secrets.compare_digest(
@@ -19,12 +16,11 @@ def _tokens_match(cookie_token, header_token):
     )
 
 
+# Double submit cookie: only same origin code can read the cookie back
+# and repeat it in the header.
 def register_csrf_protection(app):
-    """Check unsafe requests and hand out the token cookie."""
-
     @app.before_request
     def verify_csrf_token():
-        """Reject any unsafe request that does not echo the token."""
         if request.method in SAFE_METHODS:
             return None
         cookie_token = request.cookies.get(CSRF_COOKIE_NAME)
@@ -41,7 +37,6 @@ def register_csrf_protection(app):
 
     @app.after_request
     def issue_csrf_cookie(response):
-        """Give the browser a token when it does not have one yet."""
         if request.cookies.get(CSRF_COOKIE_NAME):
             return response
         response.set_cookie(

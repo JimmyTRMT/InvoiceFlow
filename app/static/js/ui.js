@@ -1,5 +1,3 @@
-// Formatting helpers shared by every page.
-
 const LOCALE = navigator.language || 'en-US';
 const CURRENCY = document.body.dataset.currency || 'EUR';
 const TOAST_DURATION = 4000;

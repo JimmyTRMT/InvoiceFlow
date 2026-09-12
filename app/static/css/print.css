@@ -1,5 +1,3 @@
-/* Printing rules for the invoice page, loaded with media="print". */
-
 @page {
   margin: 16mm;
 }

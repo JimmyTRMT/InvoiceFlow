@@ -1,5 +1,3 @@
-// Off canvas sidebar behaviour for the application shell.
-
 const DESKTOP_QUERY = window.matchMedia('(min-width: 1024px)');
 
 const sidebar = document.getElementById('sidebar');

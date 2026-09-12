@@ -1,5 +1,3 @@
-// Client list, search, and the dialog used to create or edit a client.
-
 import { ApiError, deleteJson, getJson, postJson, putJson } from './api.js';
 import { askConfirmation, showToast } from './ui.js';
 

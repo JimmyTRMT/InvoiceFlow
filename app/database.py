@@ -1,5 +1,3 @@
-"""Database bootstrap, SQLite setup and session helpers."""
-
 import logging
 import sqlite3
 
@@ -14,8 +12,8 @@ from app import models  # noqa: F401  isort:skip
 logger = logging.getLogger(__name__)
 
 
+# SQLite ignores foreign keys unless each connection asks for them.
 def _enable_sqlite_foreign_keys(dbapi_connection, connection_record):
-    """Turn on the foreign key checks that SQLite skips by default."""
     if not isinstance(dbapi_connection, sqlite3.Connection):
         return
     cursor = dbapi_connection.cursor()
@@ -24,18 +22,15 @@ def _enable_sqlite_foreign_keys(dbapi_connection, connection_record):
 
 
 def register_database_events(app):
-    """Attach the connection listeners to this application's engine."""
     with app.app_context():
         event.listen(db.engine, "connect", _enable_sqlite_foreign_keys)
 
 
 def create_schema():
-    """Create every missing table, from inside an application context."""
     db.create_all()
 
 
 def commit_or_rollback(action):
-    """Commit the transaction, rolling back and logging on failure."""
     try:
         db.session.commit()
     except SQLAlchemyError:

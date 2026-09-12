@@ -1,5 +1,3 @@
-// Invoice creation: dynamic line items, live totals and submission.
-
 import { ApiError, getJson, postJson } from './api.js';
 import { formatMoney } from './ui.js';
 

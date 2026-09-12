@@ -1,5 +1,3 @@
-"""Application factory for the InvoiceFlow backend."""
-
 import os
 
 from flask import Flask
@@ -18,7 +16,6 @@ from app.views import web_bp
 
 
 def create_app(config_name=None):
-    """Create a Flask application wired for the given environment."""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(get_config(config_name))
 
@@ -35,8 +32,8 @@ def create_app(config_name=None):
     return app
 
 
+# A generated key would invalidate every session on restart.
 def _require_secret_key(app):
-    """Refuse to start on a generated key outside development."""
     if app.debug or app.testing or os.environ.get("SECRET_KEY"):
         return
     raise RuntimeError(
@@ -45,7 +42,6 @@ def _require_secret_key(app):
 
 
 def _ensure_instance_folder(app):
-    """Create the instance folder that holds the SQLite database."""
     try:
         os.makedirs(app.instance_path, exist_ok=True)
     except OSError as error:
@@ -55,7 +51,6 @@ def _ensure_instance_folder(app):
 
 
 def _register_blueprints(app):
-    """Mount the page routes and every API blueprint."""
     app.register_blueprint(web_bp)
     app.register_blueprint(health_bp, url_prefix="/api")
     app.register_blueprint(clients_bp, url_prefix="/api")

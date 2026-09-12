@@ -1,12 +1,8 @@
-"""Client model."""
-
 from app.extensions import db
 from app.models.mixins import TimestampMixin, to_iso
 
 
 class Client(db.Model, TimestampMixin):
-    """A customer the freelancer bills."""
-
     __tablename__ = "clients"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -19,8 +15,8 @@ class Client(db.Model, TimestampMixin):
     # disappear with the client row.
     invoices = db.relationship("Invoice", back_populates="client")
 
+    # Short form embedded in invoice payloads.
     def summary(self):
-        """Return the short form embedded in invoice payloads."""
         return {
             "id": self.id,
             "name": self.name,
@@ -28,7 +24,6 @@ class Client(db.Model, TimestampMixin):
         }
 
     def to_dict(self):
-        """Serialise the client for the JSON API."""
         return {
             "id": self.id,
             "name": self.name,
@@ -40,5 +35,4 @@ class Client(db.Model, TimestampMixin):
         }
 
     def __repr__(self):
-        """Return the readable form used in the shell and in logs."""
         return f"<Client {self.id} {self.name!r}>"

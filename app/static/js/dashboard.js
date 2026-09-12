@@ -1,5 +1,3 @@
-// Fills the dashboard with the figures and invoices served by the API.
-
 import { ApiError, getJson } from './api.js';
 import { applyStatus, formatDate, formatMonth, formatMoney } from './ui.js';
 

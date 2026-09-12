@@ -1,17 +1,14 @@
-"""Helpers shared by every model."""
-
 from datetime import datetime, timezone
 
 from app.extensions import db
 
 
+# SQLite has no timezone aware type, so UTC is stored naive.
 def utcnow():
-    """Return the current UTC time as the naive value SQLite stores."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def to_iso(value):
-    """Render a date or a stored UTC datetime as an ISO 8601 string."""
     if value is None:
         return None
     if isinstance(value, datetime):
@@ -20,8 +17,6 @@ def to_iso(value):
 
 
 class TimestampMixin:
-    """Adds creation and last update timestamps to a model."""
-
     created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(
         db.DateTime, nullable=False, default=utcnow, onupdate=utcnow

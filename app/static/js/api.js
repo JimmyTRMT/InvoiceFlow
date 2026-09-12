@@ -1,5 +1,3 @@
-// Thin client over the JSON API.
-
 const CSRF_COOKIE = 'csrf_token';
 const CSRF_HEADER = 'X-CSRF-Token';
 const SAFE_METHODS = ['GET', 'HEAD'];
