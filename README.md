@@ -1,5 +1,7 @@
 # InvoiceFlow
 
+[![tests](https://github.com/JimmyTRMT/InvoiceFlow/actions/workflows/tests.yml/badge.svg)](https://github.com/JimmyTRMT/InvoiceFlow/actions/workflows/tests.yml)
+
 A small web application for freelancers to create, track and print
 invoices. It keeps a list of clients, builds invoices with several line
 items, computes the totals, and shows what is outstanding, paid or
@@ -85,16 +87,40 @@ Tailwind CSS and the Inter font are loaded from a CDN, so the interface
 needs an internet connection to look right. The application itself runs
 entirely on your machine.
 
+## Running the tests
+
+Install the development tools once:
+
+```
+pip install -r requirements-dev.txt
+```
+
+Then run the suite and the linter:
+
+```
+pytest
+flake8
+```
+
+Every test builds its own application on an in-memory database, so the
+suite never touches your local data and runs in about a second. It
+covers the API, the CSRF protection, the rounding and numbering rules,
+the overdue rule and the dashboard figures, and it checks that no page
+carries an inline script, a style attribute or a raw colour.
+
+Both commands run on every push through GitHub Actions, on the oldest
+and the newest Python the project supports.
+
 ## Pages
 
-| Path                  | What you can do there                       |
-| --------------------- | ------------------------------------------- |
-| /                     | The three figures and the six latest invoices |
-| /invoices             | The whole list, with filters and a row menu |
-| /invoices/new         | Build an invoice and watch the total add up |
+| Path                  | What you can do there                          |
+| --------------------- | ---------------------------------------------- |
+| /                     | The three figures and the six latest invoices  |
+| /invoices             | The whole list, with filters and a row menu    |
+| /invoices/new         | Build an invoice and watch the total add up    |
 | /invoices/`<id>`      | Read it, print it, move it, copy it, delete it |
-| /invoices/`<id>`/edit | Change anything, lines included              |
-| /clients              | Search, create, edit and delete a client    |
+| /invoices/`<id>`/edit | Change anything, lines included                |
+| /clients              | Search, create, edit and delete a client       |
 
 Every page loads its own ES module, asks the API for what it needs, and
 renders rows by cloning a `<template>` declared in the markup. Nothing
@@ -215,7 +241,19 @@ InvoiceFlow/
             clients.py   client rules and persistence
             dashboard.py aggregated figures
             invoices.py  invoice rules, totals and numbering
+    tests/
+        conftest.py      app, database and CSRF aware client fixtures
+        test_clients.py  client endpoints and validation
+        test_invoices.py totals, rounding, numbering, edits, filters
+        test_rules.py    overdue rule and dashboard figures
+        test_security.py CSRF, input cleaning, malformed bodies
+        test_pages.py    page rendering and markup rules
+    .github/workflows/
+        tests.yml        lint and test on every push
     .env.example         every variable the app reads
+    .flake8              lint settings
+    pytest.ini           test settings
     requirements.txt     pinned dependencies
+    requirements-dev.txt test and lint tools
     run.py               development entry point
 ```
