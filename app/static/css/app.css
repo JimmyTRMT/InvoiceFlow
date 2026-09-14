@@ -1,30 +1,67 @@
+/* Every colour in the interface resolves to one of these, which is what
+   lets the print stylesheet flip the whole theme in a single block. */
 :root {
-  /* Single source of truth for the brand scale, mapped into Tailwind. */
-  --brand-50: #eef3ff;
-  --brand-100: #dee7ff;
-  --brand-200: #c3d2ff;
-  --brand-300: #9db3ff;
-  --brand-400: #7189fb;
-  --brand-500: #4f63f2;
-  --brand-600: #3b46e0;
-  --brand-700: #3038bd;
-  --brand-800: #2a3199;
-  --brand-900: #272e7a;
+  color-scheme: dark;
+
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-300: #a5b4fc;
+  --brand-400: #818cf8;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #4338ca;
+  --brand-800: #3730a3;
+  --brand-900: #312e81;
+
+  --accent: #22d3ee;
+
+  --canvas: #05070f;
+  --surface: #0b1120;
+  --surface-soft: #111a2e;
+  --surface-strong: #16203a;
+
+  --line: #1e2a45;
+  --line-strong: #2e3d60;
+
+  --ink: #eef2ff;
+  --muted: #94a3c4;
+  --faint: #64748b;
+
+  --danger: #fb7185;
+  --success: #34d399;
+  --warning: #fbbf24;
+
+  --status-draft: #a5b3cd;
+  --status-sent: #7dd3fc;
+  --status-paid: #6ee7b7;
+  --status-overdue: #fda4af;
+
+  --glow: 0 0 0 1px rgba(99, 102, 241, 0.35), 0 0 24px rgba(99, 102, 241, 0.25);
+}
+
+/* Utilities such as flex and inline-flex are declared after this file
+   and would otherwise beat the attribute the scripts toggle. */
+[hidden] {
+  display: none !important;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Two fixed light sources, so scrolling does not drag the glow along. */
+  background-image:
+    radial-gradient(48rem 32rem at 12% -8%, rgba(79, 70, 229, 0.18), transparent 62%),
+    radial-gradient(42rem 30rem at 105% 4%, rgba(34, 211, 238, 0.10), transparent 60%);
+  background-attachment: fixed;
 }
 
-/* Keyboard users get a visible ring, pointer users are left alone. */
 :focus-visible {
-  outline: 2px solid var(--brand-500);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 0.375rem;
 }
 
-/* Shortcut to the content, kept off screen until it takes focus. */
 .skip-link {
   position: fixed;
   top: 0.75rem;
@@ -48,6 +85,8 @@ body {
 }
 
 .app-sidebar {
+  background-color: rgba(11, 17, 32, 0.92);
+  backdrop-filter: blur(14px);
   transition: transform 220ms ease;
 }
 
@@ -55,35 +94,60 @@ body {
   transform: translateX(0);
 }
 
+/* No backdrop-filter here on purpose: it would make the header the
+   containing block of the fixed action menu it holds. */
+.app-header {
+  background-color: rgba(8, 13, 26, 0.96);
+}
+
+.brand-mark {
+  background-image: linear-gradient(135deg, var(--brand-500), var(--accent));
+  box-shadow: 0 8px 24px -10px rgba(99, 102, 241, 0.9);
+}
+
 .nav-link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.625rem 0.75rem;
   border-radius: 0.5rem;
-  color: #475569;
+  color: var(--muted);
   font-size: 0.875rem;
   font-weight: 500;
   transition: background-color 150ms ease, color 150ms ease;
 }
 
 .nav-link:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: var(--surface-soft);
+  color: var(--ink);
 }
 
 .nav-link[aria-current="page"] {
-  background-color: var(--brand-50);
-  color: var(--brand-700);
+  background-color: rgba(99, 102, 241, 0.14);
+  color: var(--ink);
+}
+
+/* The lit edge that marks the section you are in. */
+.nav-link[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 2px;
+  border-radius: 9999px;
+  background-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
 }
 
 .nav-link .nav-icon {
   flex-shrink: 0;
-  color: #94a3b8;
+  color: var(--faint);
 }
 
 .nav-link[aria-current="page"] .nav-icon {
-  color: var(--brand-600);
+  color: var(--accent);
 }
 
 .btn {
@@ -97,32 +161,37 @@ body {
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.25rem;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background-color 150ms ease, border-color 150ms ease;
+  transition: background-color 150ms ease, border-color 150ms ease,
+    box-shadow 150ms ease, transform 150ms ease;
 }
 
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .btn--primary {
-  background-color: var(--brand-600);
+  background-image: linear-gradient(135deg, var(--brand-500), var(--brand-700));
   color: #ffffff;
+  box-shadow: 0 10px 26px -14px rgba(99, 102, 241, 0.95);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background-color: var(--brand-700);
+  box-shadow: 0 12px 30px -12px rgba(99, 102, 241, 1);
+  transform: translateY(-1px);
 }
 
 .btn--secondary {
-  border-color: #cbd5e1;
-  background-color: #ffffff;
-  color: #334155;
+  border-color: var(--line-strong);
+  background-color: var(--surface-soft);
+  color: var(--ink);
 }
 
 .btn--secondary:hover:not(:disabled) {
-  background-color: #f8fafc;
+  border-color: var(--brand-500);
+  background-color: var(--surface-strong);
 }
 
 .btn--danger {
@@ -134,49 +203,167 @@ body {
   background-color: #be123c;
 }
 
-/* Compact text button used inside table rows. */
+/* Square button holding a single icon. */
+.btn--icon {
+  padding: 0.5rem;
+  border-color: var(--line-strong);
+  background-color: var(--surface-soft);
+  color: var(--muted);
+}
+
+.btn--icon:hover:not(:disabled) {
+  border-color: var(--brand-500);
+  color: var(--ink);
+}
+
 .btn--quiet {
   padding: 0.25rem 0.5rem;
-  color: #475569;
+  color: var(--muted);
 }
 
 .btn--quiet:hover:not(:disabled) {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  background-color: var(--surface-soft);
+  color: var(--ink);
 }
 
 .btn--quiet-danger {
-  color: #be123c;
+  color: var(--danger);
 }
 
 .btn--quiet-danger:hover:not(:disabled) {
-  background-color: #fff1f2;
-  color: #9f1239;
+  background-color: rgba(244, 63, 94, 0.12);
 }
 
 /* Status filter, with the active one carrying aria-pressed. */
 .filter-chip {
   padding: 0.375rem 0.875rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--line-strong);
   border-radius: 9999px;
-  background-color: #ffffff;
+  background-color: transparent;
   font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.25rem;
-  color: #475569;
+  color: var(--muted);
   cursor: pointer;
-  transition: background-color 150ms ease, border-color 150ms ease;
+  transition: background-color 150ms ease, border-color 150ms ease,
+    color 150ms ease, box-shadow 150ms ease;
 }
 
 .filter-chip[aria-pressed="false"]:hover {
-  background-color: #f8fafc;
-  color: #0f172a;
+  border-color: var(--brand-500);
+  color: var(--ink);
 }
 
 .filter-chip[aria-pressed="true"] {
-  border-color: var(--brand-600);
-  background-color: var(--brand-600);
-  color: #ffffff;
+  border-color: var(--brand-400);
+  background-color: rgba(99, 102, 241, 0.18);
+  color: var(--ink);
+  box-shadow: var(--glow);
+}
+
+/* A menu anchored under its trigger. */
+.menu {
+  display: inline-flex;
+}
+
+/* Fixed rather than absolute: a row menu lives inside a table that
+   scrolls sideways, which would clip an absolutely placed panel. */
+.menu-panel {
+  position: fixed;
+  z-index: 45;
+  min-width: 11rem;
+  padding: 0.3125rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.625rem;
+  background-color: var(--surface-strong);
+  box-shadow: 0 24px 48px -20px rgba(0, 0, 0, 0.95);
+  animation: menu-in 140ms ease-out;
+}
+
+.menu-item {
+  display: block;
+  width: 100%;
+  padding: 0.4375rem 0.625rem;
+  border-radius: 0.375rem;
+  background: none;
+  border: 0;
+  font-size: 0.8125rem;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background-color: rgba(99, 102, 241, 0.18);
+}
+
+.menu-item--danger {
+  color: var(--danger);
+}
+
+.menu-item--danger:hover {
+  background-color: rgba(244, 63, 94, 0.14);
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Coloured notice above a form or a list. */
+.alert {
+  border-radius: 0.625rem;
+  border: 1px solid transparent;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+.alert--danger {
+  border-color: rgba(244, 63, 94, 0.35);
+  background-color: rgba(244, 63, 94, 0.10);
+  color: var(--danger);
+}
+
+.alert--warning {
+  border-color: rgba(251, 191, 36, 0.35);
+  background-color: rgba(251, 191, 36, 0.10);
+  color: var(--warning);
+}
+
+/* The tinted square holding a dashboard icon. */
+.stat-icon {
+  display: flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.625rem;
+  border: 1px solid transparent;
+}
+
+.stat-icon--brand {
+  border-color: rgba(99, 102, 241, 0.3);
+  background-color: rgba(99, 102, 241, 0.14);
+  color: var(--brand-300);
+}
+
+.stat-icon--success {
+  border-color: rgba(52, 211, 153, 0.3);
+  background-color: rgba(52, 211, 153, 0.12);
+  color: var(--success);
+}
+
+.stat-icon--danger {
+  border-color: rgba(244, 63, 94, 0.3);
+  background-color: rgba(244, 63, 94, 0.12);
+  color: var(--danger);
 }
 
 .form-label {
@@ -184,33 +371,33 @@ body {
   margin-bottom: 0.375rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: #334155;
+  color: var(--muted);
 }
 
 .form-control {
   display: block;
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--line-strong);
   border-radius: 0.5rem;
-  background-color: #ffffff;
+  background-color: var(--surface);
   font-size: 0.875rem;
-  color: #0f172a;
+  color: var(--ink);
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .form-control::placeholder {
-  color: #94a3b8;
+  color: var(--faint);
 }
 
 .form-control:focus {
   outline: none;
-  border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px var(--brand-100);
+  border-color: var(--brand-400);
+  box-shadow: var(--glow);
 }
 
 .form-control[aria-invalid="true"] {
-  border-color: #f87171;
+  border-color: var(--danger);
 }
 
 /* One billable line, stacked on phones and tabular from md upwards. */
@@ -239,14 +426,17 @@ body {
 }
 
 dialog {
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.875rem;
   padding: 0;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+  background-color: var(--surface-strong);
+  color: var(--ink);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.95);
 }
 
 dialog::backdrop {
-  background-color: rgba(15, 23, 42, 0.45);
+  background-color: rgba(2, 4, 10, 0.72);
+  backdrop-filter: blur(3px);
 }
 
 /* Transient confirmation of the last action, bottom of the screen. */
@@ -255,22 +445,21 @@ dialog::backdrop {
   min-width: 15rem;
   max-width: 22rem;
   padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line-strong);
   border-radius: 0.75rem;
-  background-color: #ffffff;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+  background-color: var(--surface-strong);
+  color: var(--ink);
+  box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.95);
   font-size: 0.875rem;
   animation: toast-in 180ms ease-out;
 }
 
 .toast--success {
-  border-color: #a7f3d0;
-  color: #065f46;
+  border-color: rgba(52, 211, 153, 0.45);
 }
 
 .toast--error {
-  border-color: #fecaca;
-  color: #b91c1c;
+  border-color: rgba(244, 63, 94, 0.45);
 }
 
 @keyframes toast-in {
@@ -288,6 +477,7 @@ dialog::backdrop {
 .badge {
   display: inline-flex;
   align-items: center;
+  gap: 0.375rem;
   padding: 0.125rem 0.625rem;
   border: 1px solid transparent;
   border-radius: 9999px;
@@ -297,35 +487,44 @@ dialog::backdrop {
   white-space: nowrap;
 }
 
+.badge::before {
+  content: "";
+  height: 0.375rem;
+  width: 0.375rem;
+  border-radius: 9999px;
+  background-color: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
 .badge--draft {
-  border-color: #e2e8f0;
-  background-color: #f1f5f9;
-  color: #475569;
+  border-color: rgba(148, 163, 184, 0.3);
+  background-color: rgba(148, 163, 184, 0.12);
+  color: var(--status-draft);
 }
 
 .badge--sent {
-  border-color: #bfdbfe;
-  background-color: #eff6ff;
-  color: #1d4ed8;
+  border-color: rgba(56, 189, 248, 0.35);
+  background-color: rgba(56, 189, 248, 0.12);
+  color: var(--status-sent);
 }
 
 .badge--paid {
-  border-color: #a7f3d0;
-  background-color: #ecfdf5;
-  color: #047857;
+  border-color: rgba(52, 211, 153, 0.35);
+  background-color: rgba(52, 211, 153, 0.12);
+  color: var(--status-paid);
 }
 
 .badge--overdue {
-  border-color: #fecaca;
-  background-color: #fef2f2;
-  color: #b91c1c;
+  border-color: rgba(244, 63, 94, 0.4);
+  background-color: rgba(244, 63, 94, 0.14);
+  color: var(--status-overdue);
 }
 
 /* Placeholder bars shown until the first API answer arrives. */
 .skeleton {
   display: inline-block;
   border-radius: 0.375rem;
-  background-color: #e2e8f0;
+  background-color: var(--surface-strong);
   animation: skeleton-pulse 1.4s ease-in-out infinite;
 }
 
@@ -342,12 +541,18 @@ dialog::backdrop {
 @media (prefers-reduced-motion: reduce) {
   .app-sidebar,
   .nav-link,
-  .filter-chip {
+  .filter-chip,
+  .btn {
     transition: none;
   }
 
+  .btn--primary:hover:not(:disabled) {
+    transform: none;
+  }
+
   .skeleton,
-  .toast {
+  .toast,
+  .menu-panel {
     animation: none;
   }
 }

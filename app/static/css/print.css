@@ -2,6 +2,30 @@
   margin: 16mm;
 }
 
+/* Paper is white, so the whole palette is redefined rather than fought
+   with one override per element. */
+:root {
+  color-scheme: light;
+
+  --canvas: #ffffff;
+  --surface: #ffffff;
+  --surface-soft: #ffffff;
+  --surface-strong: #ffffff;
+  --line: #cbd5e1;
+  --line-strong: #94a3b8;
+  --ink: #0f172a;
+  --muted: #475569;
+  --faint: #64748b;
+  --status-draft: #475569;
+  --status-sent: #1d4ed8;
+  --status-paid: #047857;
+  --status-overdue: #b91c1c;
+}
+
+body {
+  background-image: none !important;
+}
+
 /* These carry Tailwind utilities, so overriding them needs !important. */
 .app-sidebar,
 .app-header,
