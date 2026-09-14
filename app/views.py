@@ -35,7 +35,7 @@ def invoice_list():
 
 @web_bp.get("/invoices/new")
 def new_invoice():
-    return render_template("invoice_form.html")
+    return render_template("invoice_form.html", invoice_id=None)
 
 
 # Loaded server side so an unknown id renders the 404 page, not an
@@ -44,3 +44,12 @@ def new_invoice():
 def invoice_detail(invoice_id):
     invoice = get_invoice(invoice_id)
     return render_template("invoice_detail.html", invoice_id=invoice.id)
+
+
+# The same form serves both, told apart by the id it is given.
+@web_bp.get("/invoices/<int:invoice_id>/edit")
+def edit_invoice(invoice_id):
+    invoice = get_invoice(invoice_id)
+    return render_template(
+        "invoice_form.html", invoice_id=invoice.id, number=invoice.number
+    )

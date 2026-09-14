@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block content %}
-<p class="max-w-2xl text-sm text-slate-500">
+<p class="max-w-2xl text-sm text-muted">
   Everything you have issued, newest first. Pick a status or a client to
   narrow the list down.
 </p>
@@ -39,28 +39,29 @@
 </div>
 
 <p id="invoices-error" hidden
-   class="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+   class="alert alert--danger mt-6"
    role="alert"></p>
 
-<section class="mt-4 rounded-xl border border-slate-200 bg-white shadow-card">
-  <div class="border-b border-slate-200 px-5 py-3">
-    <p id="invoices-summary" class="text-sm text-slate-500" aria-live="polite">
+<section class="mt-4 rounded-xl border border-line bg-surface shadow-card">
+  <div class="border-b border-line px-5 py-3">
+    <p id="invoices-summary" class="text-sm text-muted" aria-live="polite">
       Loading the invoices.
     </p>
   </div>
 
   <div id="invoices-table" class="overflow-x-auto">
     <table class="min-w-full text-sm">
-      <thead class="text-left text-xs uppercase tracking-wide text-slate-400">
+      <thead class="text-left text-xs uppercase tracking-wide text-faint">
         <tr>
           <th scope="col" class="px-5 py-3 font-medium">Invoice</th>
           <th scope="col" class="hidden px-5 py-3 font-medium md:table-cell">Issued</th>
           <th scope="col" class="hidden px-5 py-3 font-medium sm:table-cell">Due</th>
           <th scope="col" class="px-5 py-3 font-medium">Status</th>
           <th scope="col" class="px-5 py-3 text-right font-medium">Total</th>
+          <th scope="col" class="px-3 py-3"><span class="sr-only">Actions</span></th>
         </tr>
       </thead>
-      <tbody id="invoices-body" class="divide-y divide-slate-100">
+      <tbody id="invoices-body" class="divide-y divide-line">
         {% for _ in range(4) %}
         <tr aria-hidden="true">
           <td class="px-5 py-4"><span class="skeleton h-4 w-36"></span></td>
@@ -68,25 +69,48 @@
           <td class="hidden px-5 py-4 sm:table-cell"><span class="skeleton h-4 w-24"></span></td>
           <td class="px-5 py-4"><span class="skeleton h-5 w-16"></span></td>
           <td class="px-5 py-4 text-right"><span class="skeleton h-4 w-20"></span></td>
+          <td class="px-3 py-4"></td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
-  <p id="invoices-empty" hidden class="px-5 py-12 text-center text-sm text-slate-500"></p>
+  <p id="invoices-empty" hidden class="px-5 py-12 text-center text-sm text-muted"></p>
 </section>
 
 <template id="invoice-row-template">
-  <tr class="hover:bg-slate-50">
+  <tr class="hover:bg-surface-soft">
     <td class="px-5 py-3.5">
-      <a class="block font-medium text-brand-700 hover:underline" data-field="link"></a>
-      <span class="block text-xs text-slate-500" data-field="client"></span>
+      <a class="block font-medium text-brand-300 hover:underline" data-field="link"></a>
+      <span class="block text-xs text-muted" data-field="client"></span>
     </td>
-    <td class="hidden whitespace-nowrap px-5 py-3.5 text-slate-500 md:table-cell" data-field="issue-date"></td>
-    <td class="hidden whitespace-nowrap px-5 py-3.5 text-slate-500 sm:table-cell" data-field="due-date"></td>
+    <td class="hidden whitespace-nowrap px-5 py-3.5 text-muted md:table-cell" data-field="issue-date"></td>
+    <td class="hidden whitespace-nowrap px-5 py-3.5 text-muted sm:table-cell" data-field="due-date"></td>
     <td class="px-5 py-3.5"><span class="badge" data-field="status"></span></td>
-    <td class="whitespace-nowrap px-5 py-3.5 text-right font-medium text-slate-900" data-field="total"></td>
+    <td class="whitespace-nowrap px-5 py-3.5 text-right font-medium text-ink" data-field="total"></td>
+    <td class="px-3 py-3.5 text-right">
+      <div class="menu" data-row-menu>
+        <button type="button" class="btn btn--icon" data-menu-trigger
+                aria-haspopup="true" aria-expanded="false">
+          <span class="sr-only">Actions for this invoice</span>
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <circle cx="12" cy="5" r="1.7"></circle>
+            <circle cx="12" cy="12" r="1.7"></circle>
+            <circle cx="12" cy="19" r="1.7"></circle>
+          </svg>
+        </button>
+
+        <div class="menu-panel" data-menu-panel hidden>
+          <button type="button" class="menu-item" data-action="advance" hidden></button>
+          <a class="menu-item" data-action="edit">Edit</a>
+          <button type="button" class="menu-item" data-action="duplicate">Duplicate</button>
+          <button type="button" class="menu-item menu-item--danger" data-action="delete">
+            Delete
+          </button>
+        </div>
+      </div>
+    </td>
   </tr>
 </template>
 {% endblock %}

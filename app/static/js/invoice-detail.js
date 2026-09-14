@@ -1,13 +1,23 @@
-import { ApiError, deleteJson, getJson, postJson } from './api.js';
+import { ApiError, getJson } from './api.js';
+import {
+  NEXT_STATUS,
+  REVERT_STATUS,
+  changeStatus,
+  confirmDelete,
+  duplicate,
+  remove,
+  reportFailure,
+} from './invoice-actions.js';
 import {
   applyStatus,
-  askConfirmation,
   formatDate,
   formatMoney,
+  setupMenu,
   showToast,
 } from './ui.js';
 
 const LIST_URL = '/invoices';
+const INVOICE_PATH = '/invoices/';
 
 const invoiceId = document.querySelector('[data-invoice-id]').dataset.invoiceId;
 
@@ -17,7 +27,11 @@ const sheet = document.getElementById('invoice-sheet');
 const actions = document.getElementById('invoice-actions');
 const linesBody = document.getElementById('invoice-lines');
 const lineTemplate = document.getElementById('invoice-line-template');
-const markPaidButton = document.getElementById('mark-paid');
+const statusButton = document.getElementById('status-action');
+const menu = document.getElementById('invoice-menu');
+const revertButton = menu.querySelector('[data-action="revert"]');
+
+setupMenu(menu);
 
 let invoice = null;
 
@@ -39,6 +53,21 @@ function buildLine(item) {
   row.querySelector('[data-field="amount"]').textContent =
     formatMoney(item.line_total);
   return row;
+}
+
+// The button offers the next step, the menu offers the way back.
+function renderActions() {
+  const next = NEXT_STATUS[invoice.status];
+  statusButton.hidden = !next;
+  if (next) {
+    statusButton.textContent = next.label;
+  }
+
+  const revert = REVERT_STATUS[invoice.status];
+  revertButton.hidden = !revert;
+  if (revert) {
+    revertButton.textContent = revert.label;
+  }
 }
 
 function render() {
@@ -67,7 +96,7 @@ function render() {
   field('notes-block').hidden = !invoice.notes;
   set('notes', invoice.notes || '');
 
-  markPaidButton.hidden = invoice.status === 'paid';
+  renderActions();
   loading.hidden = true;
   errorPanel.hidden = true;
   sheet.hidden = false;
@@ -83,44 +112,38 @@ function showError(error, fallback) {
   errorPanel.hidden = false;
 }
 
-async function markAsPaid() {
-  markPaidButton.disabled = true;
+async function moveTo(status, button) {
+  button.disabled = true;
   try {
-    invoice = await postJson(`/invoices/${invoiceId}/mark-paid`);
+    invoice = await changeStatus(invoice, status);
     render();
-    showToast('Invoice marked as paid.');
+    showToast(`Invoice moved to ${status}.`);
   } catch (error) {
-    showToast(
-      error instanceof ApiError
-        ? error.message
-        : 'The invoice could not be updated.',
-      'error'
-    );
+    reportFailure(error, 'The invoice could not be updated.');
   } finally {
-    markPaidButton.disabled = false;
+    button.disabled = false;
+  }
+}
+
+async function duplicateInvoice() {
+  try {
+    const copy = await duplicate(invoice);
+    showToast(`Copied to ${copy.number}.`);
+    window.location.assign(`${INVOICE_PATH}${copy.id}`);
+  } catch (error) {
+    reportFailure(error, 'The invoice could not be duplicated.');
   }
 }
 
 async function removeInvoice() {
-  const accepted = await askConfirmation({
-    title: 'Delete this invoice',
-    message: `${invoice.number} and all of its lines will be removed.`,
-    confirmLabel: 'Delete invoice',
-  });
-  if (!accepted) {
+  if (!await confirmDelete(invoice)) {
     return;
   }
-
   try {
-    await deleteJson(`/invoices/${invoiceId}`);
+    await remove(invoice);
     window.location.assign(LIST_URL);
   } catch (error) {
-    showToast(
-      error instanceof ApiError
-        ? error.message
-        : 'The invoice could not be deleted.',
-      'error'
-    );
+    reportFailure(error, 'The invoice could not be deleted.');
   }
 }
 
@@ -134,10 +157,19 @@ async function load() {
   }
 }
 
+statusButton.addEventListener('click', () => {
+  moveTo(NEXT_STATUS[invoice.status].value, statusButton);
+});
+revertButton.addEventListener('click', () => {
+  moveTo(REVERT_STATUS[invoice.status].value, revertButton);
+});
+menu.querySelector('[data-action="duplicate"]')
+  .addEventListener('click', duplicateInvoice);
+menu.querySelector('[data-action="delete"]')
+  .addEventListener('click', removeInvoice);
+menu.querySelector('[data-action="print"]')
+  .addEventListener('click', () => window.print());
 document.getElementById('print-invoice')
   .addEventListener('click', () => window.print());
-document.getElementById('delete-invoice')
-  .addEventListener('click', removeInvoice);
-markPaidButton.addEventListener('click', markAsPaid);
 
 load();

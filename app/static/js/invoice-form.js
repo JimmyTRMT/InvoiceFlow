@@ -1,9 +1,12 @@
-import { ApiError, getJson, postJson } from './api.js';
+import { ApiError, getJson, postJson, putJson } from './api.js';
 import { formatMoney } from './ui.js';
 
 const INVOICE_PATH = '/invoices/';
 const DEFAULT_DUE_DAYS = 30;
 const LINE_ERROR = /^line_items\[(\d+)\]\.(\w+)$/;
+
+// Empty on the creation page, an id on the edit page.
+const invoiceId = document.querySelector('[data-invoice-id]').dataset.invoiceId;
 
 const form = document.getElementById('invoice-form');
 const clientSelect = document.getElementById('invoice-client');
@@ -67,10 +70,15 @@ function removeRow(row) {
   recalculate();
 }
 
-function addRow(focus = false) {
+function addRow(focus = false, item = null) {
   const row = lineTemplate.content.firstElementChild.cloneNode(true);
   row.querySelector('[data-action="remove"]')
     .addEventListener('click', () => removeRow(row));
+  if (item) {
+    field(row, 'description').value = item.description;
+    field(row, 'quantity').value = item.quantity;
+    field(row, 'unit_price').value = item.unit_price;
+  }
   linesContainer.append(row);
   if (focus) {
     field(row, 'description').focus();
@@ -195,7 +203,9 @@ async function submitForm(event) {
 
   submitButton.disabled = true;
   try {
-    const invoice = await postJson('/invoices', payload);
+    const invoice = invoiceId
+      ? await putJson(`/invoices/${invoiceId}`, payload)
+      : await postJson('/invoices', payload);
     window.location.assign(`${INVOICE_PATH}${invoice.id}`);
   } catch (error) {
     applyServerErrors(error, sentRows);
@@ -205,11 +215,36 @@ async function submitForm(event) {
   }
 }
 
+async function loadInvoice() {
+  try {
+    const invoice = await getJson(`/invoices/${invoiceId}`);
+    clientSelect.value = String(invoice.client_id);
+    issueDateInput.value = invoice.issue_date;
+    dueDateInput.value = invoice.due_date;
+    form.elements.status.value = invoice.status;
+    taxRateInput.value = invoice.tax_rate;
+    form.elements.notes.value = invoice.notes || '';
+    invoice.line_items.forEach((item) => addRow(false, item));
+  } catch (error) {
+    showFormError(error, 'The invoice could not be loaded.');
+    submitButton.disabled = true;
+  }
+}
+
 document.getElementById('add-line')
   .addEventListener('click', () => addRow(true));
 form.addEventListener('submit', submitForm);
 form.addEventListener('input', recalculate);
 
-applyDefaultDates();
-addRow();
-loadClients();
+// The client list has to exist before a saved client can be selected.
+async function start() {
+  await loadClients();
+  if (invoiceId) {
+    await loadInvoice();
+    return;
+  }
+  applyDefaultDates();
+  addRow();
+}
+
+start();

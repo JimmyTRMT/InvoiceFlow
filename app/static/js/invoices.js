@@ -1,5 +1,19 @@
 import { ApiError, getJson } from './api.js';
-import { applyStatus, formatDate, formatMoney } from './ui.js';
+import {
+  NEXT_STATUS,
+  changeStatus,
+  confirmDelete,
+  duplicate,
+  remove,
+  reportFailure,
+} from './invoice-actions.js';
+import {
+  applyStatus,
+  formatDate,
+  formatMoney,
+  setupMenu,
+  showToast,
+} from './ui.js';
 
 const INVOICE_PATH = '/invoices/';
 
@@ -51,6 +65,58 @@ function selectStatus(status) {
   });
 }
 
+// Run one row action, then read the list back so every row reflects it.
+async function runAction(work, failure) {
+  try {
+    const message = await work();
+    await loadInvoices();
+    if (message) {
+      showToast(message);
+    }
+  } catch (error) {
+    reportFailure(error, failure);
+  }
+}
+
+function wireMenu(row, invoice) {
+  const menu = row.querySelector('[data-row-menu]');
+  const item = (name) => menu.querySelector(`[data-action="${name}"]`);
+  setupMenu(menu);
+
+  const next = NEXT_STATUS[invoice.status];
+  const advance = item('advance');
+  advance.hidden = !next;
+  if (next) {
+    advance.textContent = next.label;
+    advance.addEventListener('click', () => runAction(
+      async () => {
+        await changeStatus(invoice, next.value);
+        return `${invoice.number} moved to ${next.value}.`;
+      },
+      'The invoice could not be updated.'
+    ));
+  }
+
+  item('edit').href = `${INVOICE_PATH}${invoice.id}/edit`;
+
+  item('duplicate').addEventListener('click', () => runAction(
+    async () => `Copied to ${(await duplicate(invoice)).number}.`,
+    'The invoice could not be duplicated.'
+  ));
+
+  item('delete').addEventListener('click', async () => {
+    if (await confirmDelete(invoice)) {
+      runAction(
+        async () => {
+          await remove(invoice);
+          return `${invoice.number} deleted.`;
+        },
+        'The invoice could not be deleted.'
+      );
+    }
+  });
+}
+
 function buildRow(invoice) {
   const row = rowTemplate.content.firstElementChild.cloneNode(true);
   const field = (name) => row.querySelector(`[data-field="${name}"]`);
@@ -63,6 +129,7 @@ function buildRow(invoice) {
   field('due-date').textContent = formatDate(invoice.due_date);
   field('total').textContent = formatMoney(invoice.total);
   applyStatus(field('status'), invoice.effective_status);
+  wireMenu(row, invoice);
   return row;
 }
 
